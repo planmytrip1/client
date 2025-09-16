@@ -1,0 +1,240 @@
+'use client';
+
+import { useGetTourByIdQuery } from '@/store/features/api/tourApi';
+import Image from 'next/image';
+import { useState } from 'react';
+import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Tag } from 'lucide-react';
+
+export default function TourDetailsPage({ params }: { params: { id: string } }) {
+  const { data: tour, isLoading, error } = useGetTourByIdQuery(params.id);
+  const [activeImage, setActiveImage] = useState(0);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+        <p className="mt-2 text-gray-600">Loading tour details...</p>
+      </div>
+    );
+  }
+
+  if (error || !tour) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <p className="text-red-600">Failed to load tour details</p>
+      </div>
+    );
+  }
+
+  // Format date to readable format
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        {/* Tour Gallery */}
+        <div className="relative">
+          {tour.images && tour.images.length > 0 ? (
+            <div>
+              <div className="relative h-[400px]">
+                <Image
+                  src={`${process.env.NEXT_PUBLIC_API_URL}/images/${tour.images[activeImage]}`}
+                  alt={tour.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              {tour.images.length > 1 && (
+                <div className="flex overflow-x-auto gap-2 p-2 bg-gray-100">
+                  {tour.images.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setActiveImage(index)}
+                      className={`relative h-16 w-24 flex-shrink-0 cursor-pointer ${
+                        activeImage === index ? 'ring-2 ring-blue-600' : ''
+                      }`}
+                    >
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_URL}/images/${image}`}
+                        alt={`Tour image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-[400px] bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500">No images available</span>
+            </div>
+          )}
+        </div>
+
+        {/* Tour Details */}
+        <div className="p-6">
+          <h1 className="text-3xl font-bold mb-2">{tour.title}</h1>
+          <div className="flex items-center text-gray-600 mb-4">
+            <MapPin className="h-5 w-5 mr-1" />
+            <span>{tour.destination}</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+              <Calendar className="h-5 w-5 text-blue-600 mr-2" />
+              <div>
+                <p className="text-sm text-gray-600">Duration</p>
+                <p className="font-medium">
+                  {formatDate(tour.startDate)} - {formatDate(tour.endDate)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center p-3 bg-green-50 rounded-lg">
+              <DollarSign className="h-5 w-5 text-green-600 mr-2" />
+              <div>
+                <p className="text-sm text-gray-600">Price per person</p>
+                <p className="font-medium">
+                  {tour.currency} {tour.pricePerPerson}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center p-3 bg-yellow-50 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-yellow-600 mr-2" />
+              <div>
+                <p className="text-sm text-gray-600">Airfare Included</p>
+                <p className="font-medium">{tour.airfareIncluded ? 'Yes' : 'No'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-3">Description</h2>
+            <p className="text-gray-700">{tour.description}</p>
+          </div>
+
+          {/* Locations */}
+          {tour.locations && tour.locations.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-3">Locations</h2>
+              <div className="flex flex-wrap gap-2">
+                {tour.locations.map((location, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                  >
+                    {location}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Itinerary */}
+          {tour.itinerary && tour.itinerary.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-3">Itinerary</h2>
+              <div className="space-y-4">
+                {tour.itinerary.map((day, index) => (
+                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                    <h3 className="font-medium flex items-center">
+                      <div className="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mr-2">
+                        {day.day}
+                      </div>
+                      Day {day.day}
+                    </h3>
+                    <p className="mt-2 text-gray-700">{day.activities}</p>
+                    {day.accommodation && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        <span className="font-medium">Accommodation:</span>{' '}
+                        {day.accommodation}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Package Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Includes */}
+            {tour.packageIncludes && tour.packageIncludes.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">Package Includes</h2>
+                <ul className="space-y-2">
+                  {tour.packageIncludes.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Excludes */}
+            {tour.packageExcludes && tour.packageExcludes.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">Package Excludes</h2>
+                <ul className="space-y-2">
+                  {tour.packageExcludes.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <XCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Coupons */}
+          {tour.coupons && tour.coupons.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-3">Available Coupons</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {tour.coupons.map((coupon, index) => (
+                  <div
+                    key={index}
+                    className="p-3 border border-gray-200 rounded-lg bg-gray-50"
+                  >
+                    <div className="flex items-center mb-2">
+                      <Tag className="h-4 w-4 text-blue-500 mr-2" />
+                      <h3 className="font-medium">{coupon.name}</h3>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">
+                        {coupon.type === 'percentage' ? 'Percentage' : 'Fixed Amount'}
+                      </span>
+                      <span className="font-bold">
+                        {coupon.type === 'percentage'
+                          ? `${coupon.value}%`
+                          : `${tour.currency} ${coupon.value}`}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Book Now Button */}
+          <div className="mt-8">
+            <button className="w-full md:w-auto py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+              Book This Tour
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
