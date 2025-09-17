@@ -69,7 +69,7 @@ const formatDate = (dateString: string) => {
 
         {/* Button */}
         <Link
-          href={`/tours/${tour._id}`}
+          href={`/main/tours/${tour._id}`}
           className="block w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white text-center rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
         >
           View Details

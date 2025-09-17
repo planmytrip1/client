@@ -7,7 +7,7 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '5005',
-        pathname: '/images/**',
+        pathname: '/api/images/**',
       },
     ],
   },
@@ -16,10 +16,6 @@ const nextConfig = {
       {
         source: '/api/:path*',
         destination: 'http://localhost:5005/api/:path*',
-      },
-      {
-        source: '/images/:path*',
-        destination: 'http://localhost:5005/images/:path*',
       },
     ];
   },

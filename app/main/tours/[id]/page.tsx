@@ -4,9 +4,12 @@ import { useGetTourByIdQuery } from '@/store/features/api/tourApi';
 import Image from 'next/image';
 import { useState } from 'react';
 import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Tag } from 'lucide-react';
+import { use } from 'react';
 
-export default function TourDetailsPage({ params }: { params: { id: string } }) {
-  const { data: tour, isLoading, error } = useGetTourByIdQuery(params.id);
+export default function TourDetailsPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
+ // Unwrap the params with React.use()
+  const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
+  const { data: tour, isLoading, error } = useGetTourByIdQuery(resolvedParams.id);
   const [activeImage, setActiveImage] = useState(0);
 
   if (isLoading) {
@@ -44,7 +47,7 @@ export default function TourDetailsPage({ params }: { params: { id: string } }) 
             <div>
               <div className="relative h-[400px]">
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_API_URL}/images/${tour.images[activeImage]}`}
+                  src={`/api/images/${tour.images[activeImage]}`}
                   alt={tour.title}
                   fill
                   className="object-cover"
@@ -61,7 +64,7 @@ export default function TourDetailsPage({ params }: { params: { id: string } }) 
                       }`}
                     >
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_API_URL}/images/${image}`}
+                        src={`/api/images/${image}`}
                         alt={`Tour image ${index + 1}`}
                         fill
                         className="object-cover"
