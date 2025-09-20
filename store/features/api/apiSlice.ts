@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '@/store';
+import { config } from '@/lib/config';
 
 // Create the base API slice
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5005/api',
+    baseUrl: config.apiUrl,
     prepareHeaders: (headers, { getState }) => {
       // Get the token from the auth state
       const token = (getState() as RootState).auth.token;
@@ -18,6 +19,6 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Tour', 'Hotel', 'User'],
+  tagTypes: ['Tour', 'Hotel', 'User', 'Banner'],
   endpoints: () => ({}),
 });

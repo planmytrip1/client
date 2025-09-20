@@ -3,6 +3,7 @@
 import { useGetToursQuery } from '@/store/features/api/tourApi';
 import TourCard from '@/components/tours/TourCard';
 import Link from 'next/link';
+import Banner from "@/components/layout/Banner";
 
 export default function HomePage() {
   const { data: tours, isLoading, error } = useGetToursQuery();
@@ -13,23 +14,7 @@ export default function HomePage() {
   return (
     <main className="container mx-auto px-4 py-10">
       {/* Hero Section */}
-      <section className="relative py-24 rounded-2xl overflow-hidden mb-16">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-teal-600 to-green-500 opacity-90"></div>
-        <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-5xl md:text-6xl font-extrabold drop-shadow-lg mb-6">
-            Plan Your Perfect Trip
-          </h1>
-          <p className="text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Discover amazing tours, breathtaking views and plan your next adventure with us.
-          </p>
-          <Link
-            href="/main/tours"
-            className="inline-block bg-white text-blue-700 font-semibold px-8 py-4 rounded-xl shadow-md hover:bg-blue-50 hover:scale-105 transition-all duration-300"
-          >
-            Explore Tours
-          </Link>
-        </div>
-      </section>
+     <Banner />
 
       {/* Featured Tours Section */}
       <section className="mb-16">
