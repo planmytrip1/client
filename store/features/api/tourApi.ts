@@ -1,5 +1,5 @@
 import { apiSlice } from './apiSlice';
-import { ITour } from '@/lib/types';
+import { ITour } from '@/lib/types/ITour';
 
 export const tourApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

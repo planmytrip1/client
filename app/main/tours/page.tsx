@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useGetToursQuery } from "@/store/features/api/tourApi";
 import TourCard from "@/components/tours/TourCard";
-import { ITour } from '@/lib/types';
+import { ITour } from '@/lib/types/ITour';
 
 export default function ToursPage() {
   const { data: tours = [], isLoading, error } = useGetToursQuery();
@@ -68,7 +68,6 @@ export default function ToursPage() {
   setFilteredTours(filtered);
   setCurrentPage(1);
 
-  console.log("Filtered Tours:", filtered);
 }, [tours, searchTerm, selectedDestination, selectedMonth, priceRange]);
 
 

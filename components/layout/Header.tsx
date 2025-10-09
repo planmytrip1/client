@@ -33,7 +33,7 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="font-bold text-xl text-blue-600">
-            PlanMyTrip
+            Amana Tours & Travel
           </Link>
 
           {/* Desktop Navigation */}
@@ -44,9 +44,15 @@ export default function Header() {
             <Link href="/main/tours" className="text-gray-700 hover:text-blue-600">
               Tours
             </Link>
-            <Link href="/hotels" className="text-gray-700 hover:text-blue-600">
-              Hotels
+            <Link href="/main/hajj" className="text-gray-700 hover:text-blue-600">
+              Hajj
             </Link>
+            <Link href="/main/umrah" className="text-gray-700 hover:text-blue-600">
+              Umrah
+            </Link>
+            {/* <Link href="/hotels" className="text-gray-700 hover:text-blue-600">
+              Hotels
+            </Link> */}
             <Link href="/about" className="text-gray-700 hover:text-blue-600">
               About
             </Link>

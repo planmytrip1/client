@@ -1,5 +1,6 @@
 // store/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '@/store';
 
 interface User {
   id: string;
@@ -62,3 +63,8 @@ const authSlice = createSlice({
 
 export const { setCredentials, logout, initializeAuth } = authSlice.actions;
 export default authSlice.reducer;
+
+// সিলেক্টর এক্সপোর্ট করুন
+export const selectUser = (state: RootState) => state.auth.user;
+export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectToken = (state: RootState) => state.auth.token;

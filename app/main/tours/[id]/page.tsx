@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { useGetTourByIdQuery } from '@/store/features/api/tourApi';
-import Image from 'next/image';
-import { useState } from 'react';
-import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Tag } from 'lucide-react';
-import { use } from 'react';
+import { useGetTourByIdQuery } from "@/store/features/api/tourApi";
+import Image from "next/image";
+import { useState } from "react";
+import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Tag } from "lucide-react";
+import { use } from "react";
+import ReviewSection from "@/components/common/ReviewSection";
 
-export default function TourDetailsPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
- // Unwrap the params with React.use()
+export default function TourDetailsPage({ params }: { params: { id: string } }) {
+  // Unwrap the params with React.use()
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: tour, isLoading, error } = useGetTourByIdQuery(resolvedParams.id);
   const [activeImage, setActiveImage] = useState(0);
@@ -31,10 +32,10 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
 
   // Format date to readable format
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -45,30 +46,14 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
         <div className="relative">
           {tour.images && tour.images.length > 0 ? (
             <div>
-              <div className="relative h-[400px]">
-                <Image
-                  src={`/api/images/${tour.images[activeImage]}`}
-                  alt={tour.title}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative h-[600px]">
+                <Image src={`/api/images/tours/${tour.images[activeImage]}`} alt={tour.title} fill className="object-cover" />
               </div>
               {tour.images.length > 1 && (
                 <div className="flex overflow-x-auto gap-2 p-2 bg-gray-100">
                   {tour.images.map((image, index) => (
-                    <div
-                      key={index}
-                      onClick={() => setActiveImage(index)}
-                      className={`relative h-16 w-24 flex-shrink-0 cursor-pointer ${
-                        activeImage === index ? 'ring-2 ring-blue-600' : ''
-                      }`}
-                    >
-                      <Image
-                        src={`/api/images/${image}`}
-                        alt={`Tour image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                    <div key={index} onClick={() => setActiveImage(index)} className={`relative h-16 w-24 flex-shrink-0 cursor-pointer ${activeImage === index ? "ring-2 ring-blue-600" : ""}`}>
+                      <Image src={`/api/images/tours/${image}`} alt={`Tour image ${index + 1}`} fill className="object-cover" />
                     </div>
                   ))}
                 </div>
@@ -114,7 +99,7 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
               <CheckCircle className="h-5 w-5 text-yellow-600 mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Airfare Included</p>
-                <p className="font-medium">{tour.airfareIncluded ? 'Yes' : 'No'}</p>
+                <p className="font-medium">{tour.airfareIncluded ? "Yes" : "No"}</p>
               </div>
             </div>
           </div>
@@ -130,10 +115,7 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
               <h2 className="text-xl font-semibold mb-3">Locations</h2>
               <div className="flex flex-wrap gap-2">
                 {tour.locations.map((location, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                  >
+                  <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                     {location}
                   </span>
                 ))}
@@ -149,16 +131,13 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
                 {tour.itinerary.map((day, index) => (
                   <div key={index} className="p-4 border border-gray-200 rounded-lg">
                     <h3 className="font-medium flex items-center">
-                      <div className="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mr-2">
-                        {day.day}
-                      </div>
+                      <div className="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mr-2">{day.day}</div>
                       Day {day.day}
                     </h3>
                     <p className="mt-2 text-gray-700">{day.activities}</p>
                     {day.accommodation && (
                       <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Accommodation:</span>{' '}
-                        {day.accommodation}
+                        <span className="font-medium">Accommodation:</span> {day.accommodation}
                       </p>
                     )}
                   </div>
@@ -206,23 +185,14 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
               <h2 className="text-xl font-semibold mb-3">Available Coupons</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {tour.coupons.map((coupon, index) => (
-                  <div
-                    key={index}
-                    className="p-3 border border-gray-200 rounded-lg bg-gray-50"
-                  >
+                  <div key={index} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                     <div className="flex items-center mb-2">
                       <Tag className="h-4 w-4 text-blue-500 mr-2" />
                       <h3 className="font-medium">{coupon.name}</h3>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">
-                        {coupon.type === 'percentage' ? 'Percentage' : 'Fixed Amount'}
-                      </span>
-                      <span className="font-bold">
-                        {coupon.type === 'percentage'
-                          ? `${coupon.value}%`
-                          : `${tour.currency} ${coupon.value}`}
-                      </span>
+                      <span className="text-sm text-gray-600">{coupon.type === "percentage" ? "Percentage" : "Fixed Amount"}</span>
+                      <span className="font-bold">{coupon.type === "percentage" ? `${coupon.value}%` : `${tour.currency} ${coupon.value}`}</span>
                     </div>
                   </div>
                 ))}
@@ -232,11 +202,11 @@ export default function TourDetailsPage({ params }: { params: { id: string } | P
 
           {/* Book Now Button */}
           <div className="mt-8">
-            <button className="w-full md:w-auto py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-              Book This Tour
-            </button>
+            <button className="w-full md:w-auto py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">Book This Tour</button>
           </div>
         </div>
+
+        <div className="p-6">{tour && tour._id && <ReviewSection entityId={tour._id} entityType="Tours" />}</div>
       </div>
     </div>
   );

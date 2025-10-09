@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useMemo } from "react";
 import { Search } from "lucide-react";
-import { ITour } from "@/lib/types";
+import { ITour } from "@/lib/types/ITour";
 
 interface TourFiltersProps {
   tours: ITour[];

@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+// import { Inter } from "next/font/google";
+import "./global.css";
 import { ReduxProvider } from "@/store/provider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AuthCheck from "@/components/AuthCheck";
 import AuthInitializer from '@/components/AuthInitializer';
 
-const inter = Inter({ subsets: ["latin"] });
+// const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PlanMyTrip - Discover Amazing Tours",
+  title: "Amana Tours and Travel - Discover Amazing Tours",
   description: "Find and book the best tours for your next adventure",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body >
         <ReduxProvider>
           <AuthInitializer />
           <AuthCheck>
