@@ -1,3 +1,4 @@
+// store/features/api/apiSlice.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '@/store';
 import { config } from '@/lib/config';
@@ -19,6 +20,6 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Tour', 'Hotel', 'User', 'Banner', 'Hajj', 'Umrah', 'Review'],
+  tagTypes: ['User', 'Tour', 'Hotel', 'Banner', 'Hajj', 'Umrah', 'Review'],
   endpoints: () => ({}),
 });

@@ -105,7 +105,7 @@ export default function ReviewSection({ entityId, entityType }: ReviewSectionPro
           >
             {isSubmitting ? <LoadingSpinner size="small" /> : "Submit Review"}
           </button>
-          {!user && <p className="text-sm text-gray-500 mt-2">Please sign in to leave a review</p>}
+          {!user && <p className="text-sm text-red-500 mt-2">Please sign in to leave a review</p>}
         </form>
       </div>
 
@@ -119,7 +119,7 @@ export default function ReviewSection({ entityId, entityType }: ReviewSectionPro
           </div>
         ) : allReviews && allReviews.length > 0 ? (
           <>
-            {currentReviews.map((review) => (
+            {currentReviews?.map((review) => (
               <div key={review._id} className="border-b border-gray-200 pb-6 last:border-0">
                 <div className="flex items-center mb-2">
                   <div className="h-10 w-10 relative rounded-full overflow-hidden bg-gray-200 mr-3">
