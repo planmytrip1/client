@@ -66,12 +66,12 @@ export default function TourFilters({ tours }: TourFiltersProps) {
             placeholder="Search tours..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
           />
           <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
         </div>
 
-        <button onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+        <button onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-2 px-4 py-2 bg-tour text-white rounded-lg hover:bg-tour-600 transition">
           Filters
         </button>
       </div>
@@ -80,7 +80,11 @@ export default function TourFilters({ tours }: TourFiltersProps) {
       {showFilters && (
         <div className="bg-white shadow-md rounded-lg p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Destination */}
-          <select value={selectedDestination} onChange={(e) => setSelectedDestination(e.target.value)} className="p-2 border border-gray-300 rounded-lg">
+          <select 
+            value={selectedDestination} 
+            onChange={(e) => setSelectedDestination(e.target.value)} 
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
+          >
             <option value="">All Destinations</option>
             {destinations.map((dest, id) => (
               <option key={id} value={dest}>
@@ -90,7 +94,11 @@ export default function TourFilters({ tours }: TourFiltersProps) {
           </select>
 
           {/* Month */}
-          <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="p-2 border border-gray-300 rounded-lg">
+          <select 
+            value={selectedMonth} 
+            onChange={(e) => setSelectedMonth(e.target.value)} 
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
+          >
             <option value="">All Months</option>
             <option value="January">January</option>
             <option value="February">February</option>
@@ -113,7 +121,7 @@ export default function TourFilters({ tours }: TourFiltersProps) {
               placeholder="Min"
               value={priceRange.min}
               onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-              className="w-1/2 p-2 border border-gray-300 rounded-lg"
+              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
             />
             <span>to</span>
             <input
@@ -121,7 +129,7 @@ export default function TourFilters({ tours }: TourFiltersProps) {
               placeholder="Max"
               value={priceRange.max}
               onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-              className="w-1/2 p-2 border border-gray-300 rounded-lg"
+              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
             />
           </div>
         </div>

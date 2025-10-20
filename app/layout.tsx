@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthCheck>
             <div className="flex flex-col min-h-screen">
               <Header />
-              <main className="flex-grow bg-gray-50">{children}</main>
+              <main className="flex-grow bg-gray-50 mt-16 ">{children}</main>
               <Footer />
             </div>
           </AuthCheck>

@@ -32,7 +32,7 @@ export default function FeatureCard({ feature, type }: FeatureCardProps) {
   const currency = (feature as any).currency ?? "৳";
 
   return (
-    <div className="group bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+    <div className="group bg-surface rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
       {/* Image Section */}
       <div className="relative h-52 w-full">
         {images.length > 0 ? (
@@ -49,7 +49,7 @@ export default function FeatureCard({ feature, type }: FeatureCardProps) {
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary/70 to-transparent p-4">
           <h3 className="text-white font-bold text-lg md:text-xl line-clamp-1">
             {title}
           </h3>
@@ -60,7 +60,7 @@ export default function FeatureCard({ feature, type }: FeatureCardProps) {
 
         {/* Offer Tag */}
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
-          <span className="text-blue-700 font-semibold text-sm">15% off</span>
+          <span className="text-primary font-semibold text-sm">15% off</span>
         </div>
       </div>
 
@@ -81,7 +81,7 @@ export default function FeatureCard({ feature, type }: FeatureCardProps) {
           )}
 
           {/* Description */}
-          <p className="text-gray-700 text-sm line-clamp-3 mb-4">
+          <p className="text-text-light text-sm line-clamp-3 mb-4">
             {description}
           </p>
         </div>
@@ -91,15 +91,15 @@ export default function FeatureCard({ feature, type }: FeatureCardProps) {
           <div className="flex justify-between items-center mt-2 mb-4">
             {price && (
               <div>
-                <span className="text-blue-700 font-semibold text-sm">
+                <span className="text-primary-400 font-semibold text-sm">
                   {currency} {price}
                 </span>
-                <span className="text-xs text-gray-500 ml-1">/person</span>
+                <span className="text-xs text-muted ml-1">/person</span>
               </div>
             )}
 
             <p className="flex justify-start items-center gap-1">
-              <Star className="w-5 h-5 mt-[-1px] text-blue-700 " /> 4.47{" "}
+              <Star className="w-5 h-5 mt-[-1px] text-secondary" /> 4.47{" "}
               <small>(102)</small>
             </p>
           </div>
@@ -107,7 +107,7 @@ export default function FeatureCard({ feature, type }: FeatureCardProps) {
           {/* Button */}
           <Link
             href={`/main/${type}/${feature._id}`}
-            className="block w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white text-center rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+            className="block w-full py-2.5 px-4 bg-gradient-to-r from-primary to-primary-400 hover:from-primary-600 hover:to-primary-500 text-white text-center rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
           >
             View Details
           </Link>

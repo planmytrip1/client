@@ -3,7 +3,7 @@
 import { useGetHajjByIdQuery } from '../../../../store/features/api/HajjApi';
 import Image from 'next/image';
 import { useState } from 'react';
-import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Tag, Star } from 'lucide-react';
+import { Calendar, DollarSign, CheckCircle, XCircle, Tag, Star } from 'lucide-react';
 import { use } from 'react';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import HotelDetails from '@/components/common/HotelDetails';
@@ -11,9 +11,16 @@ import ItineraryTimeline from '@/components/common/ItineraryTimeline';
 import HajjAccommodationDetails from '@/components/hajj/HajjAccommodationDetails';
 import ReviewSection from "@/components/common/ReviewSection";
 
+export interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+}
+
+// export default function HajjDetailsPage({ params, searchParams }: PageProps) {
 export default function HajjDetailsPage({ params }: { params: { id: string } }) {
-  // Unwrap the params with React.use()
   // const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
+  // const resolvedSearchParams = searchParams ? use(searchParams) : undefined;
+  // const id = resolvedParams.id;
   const id = params?.id;
   const { data: hajj, isLoading, error } = useGetHajjByIdQuery(id ?? '');
   const [activeImage, setActiveImage] = useState(0);
@@ -58,7 +65,7 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
                       key={index}
                       onClick={() => setActiveImage(index)}
                       className={`relative h-16 w-24 flex-shrink-0 cursor-pointer ${
-                        activeImage === index ? 'ring-2 ring-green-600' : ''
+                        activeImage === index ? 'ring-2 ring-hajj' : ''
                       }`}
                     >
                       <Image
@@ -94,22 +101,22 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
             <span>{hajj.duration} | Hajj {hajj.hajjYear}</span>
           </div>
           <div className="flex items-center mb-4">
-            <Star className="h-5 w-5 text-yellow-500 mr-1" />
+            <Star className="h-5 w-5 text-hajj mr-1" />
             <span className="text-gray-700 font-medium">4.8 (24 reviews)</span>
           </div>
 
           {/* Package Highlights */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="flex items-center p-3 bg-green-50 rounded-lg">
-              <Calendar className="h-5 w-5 text-green-600 mr-2" />
+            <div className="flex items-center p-3 bg-hajj-50 rounded-lg">
+              <Calendar className="h-5 w-5 text-hajj mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Duration</p>
                 <p className="font-medium">{hajj.duration}</p>
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-blue-50 rounded-lg">
-              <DollarSign className="h-5 w-5 text-blue-600 mr-2" />
+            <div className="flex items-center p-3 bg-hajj-50 rounded-lg">
+              <DollarSign className="h-5 w-5 text-hajj mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Starting Price</p>
                 <p className="font-medium">
@@ -118,8 +125,8 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-purple-50 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-purple-600 mr-2" />
+            <div className="flex items-center p-3 bg-hajj-50 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-hajj mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Kurbani Included</p>
                 <p className="font-medium">{hajj.kurbani?.included ? 'Yes' : 'No'}</p>
@@ -136,8 +143,8 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 font-medium transition-colors ${
                     activeTab === tab
-                      ? 'text-green-600 border-b-2 border-green-600'
-                      : 'text-gray-600 hover:text-green-600'
+                      ? 'text-hajj border-b-2 border-hajj'
+                      : 'text-gray-600 hover:text-hajj'
                   }`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -161,7 +168,7 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
                       <ul className="space-y-2">
                         {hajj.packageIncludes.map((item, index) => (
                           <li key={index} className="flex items-start">
-                            <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                            <CheckCircle className="h-5 w-5 text-hajj mr-2 flex-shrink-0 mt-0.5" />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -263,16 +270,16 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
           </div>
 
           {/* Pricing Section */}
-          <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+          <div className="mt-8 p-6 bg-hajj-50/50 rounded-xl">
             <h2 className="text-xl font-semibold mb-4">Pricing</h2>
             
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="text-left p-3 bg-gray-100">Package Type</th>
-                    <th className="text-left p-3 bg-gray-100">Accommodation Type</th>
-                    <th className="text-left p-3 bg-gray-100">Price (BDT)</th>
+                    <th className="text-left p-3 bg-hajj-100/70">Package Type</th>
+                    <th className="text-left p-3 bg-hajj-100/70">Accommodation Type</th>
+                    <th className="text-left p-3 bg-hajj-100/70">Price (BDT)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -296,10 +303,10 @@ export default function HajjDetailsPage({ params }: { params: { id: string } }) 
 
           {/* Book Now Button */}
           <div className="mt-8 flex flex-col md:flex-row gap-4 items-center">
-            <button className="w-full md:w-auto py-3 px-8 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg">
+            <button className="w-full md:w-auto py-3 px-8 bg-hajj hover:bg-hajj-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg">
               Book This Package
             </button>
-            <button className="w-full md:w-auto py-3 px-8 border border-green-600 text-green-600 hover:bg-green-50 font-medium rounded-lg transition-colors">
+            <button className="w-full md:w-auto py-3 px-8 border border-hajj text-hajj hover:bg-hajj-50 font-medium rounded-lg transition-colors">
               Download Brochure
             </button>
           </div>

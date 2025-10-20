@@ -14,7 +14,6 @@ export default function UmrahPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const packagesPerPage = 3;
 
-
   // Filtered Data
   const [filteredPackages, setFilteredPackages] = useState<IUmrah[]>([]);
   
@@ -39,7 +38,7 @@ export default function UmrahPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-gradient">Explore Our Umrah Packages</h1>
+      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-umrah to-umrah-400 text-transparent bg-clip-text">Explore Our Umrah Packages</h1>
       
       {/* Filters */}
       <UmrahFilters 
@@ -87,7 +86,7 @@ export default function UmrahPage() {
                   onClick={() => setCurrentPage(i + 1)}
                   className={`px-4 py-2 rounded-lg border ${
                     currentPage === i + 1
-                      ? "bg-blue-600 text-white border-blue-600"
+                      ? "bg-umrah text-white border-umrah"
                       : "bg-white text-gray-700 hover:bg-gray-100 border-gray-300"
                   }`}
                 >

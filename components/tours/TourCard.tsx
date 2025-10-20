@@ -8,7 +8,7 @@ interface TourCardProps {
 }
 
 export default function TourCard({ tour }: TourCardProps) {
-  // Safe date formatting (hydration mismatch এড়াতে client-side format ব্যবহার ভালো)
+  // Safe date formatting (hydration mismatch এড়াতে client-side format ব্যবহার ভালো)
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -19,7 +19,7 @@ export default function TourCard({ tour }: TourCardProps) {
   };
 
   return (
-    <div className="group bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+    <div className="group bg-surface rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
       {/* Image Section */}
       <div className="relative h-52 w-full">
         {tour.images && tour.images.length > 0 ? (
@@ -31,21 +31,14 @@ export default function TourCard({ tour }: TourCardProps) {
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-tour/70 to-transparent p-4">
           <h3 className="text-white font-bold text-lg md:text-xl line-clamp-1">{tour.title}</h3>
           <p className="text-white/80 text-sm">{tour.destination}</p>
         </div>
 
         {/* Price Tag */}
-        {/* <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
-          <span className="text-blue-700 font-semibold text-sm">
-            {tour.currency} {tour.pricePerPerson}
-          </span>
-          <span className="text-xs text-gray-500 ml-1">/person</span>
-        </div>  */}
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
-          <span className="text-blue-700 font-semibold text-sm">15% off</span>
-          {/* <span className="text-xs text-gray-500 ml-1">/person</span> */}
+          <span className="text-tour font-semibold text-sm">15% off</span>
         </div>
       </div>
 
@@ -60,28 +53,27 @@ export default function TourCard({ tour }: TourCardProps) {
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 text-sm line-clamp-3 mb-4">{tour.description}</p>
+          <p className="text-text-light text-sm line-clamp-3 mb-4">{tour.description}</p>
         </div>
 
         <div>
           {/* review star */}
           <div className="flex justify-between items-center mt-2 mb-4">
             <div className="">
-              <span className="text-blue-700 font-semibold text-sm">
+              <span className="text-tour font-semibold text-sm">
                 {tour.currency} {tour.pricePerPerson}
               </span>
-              <span className="text-xs text-gray-500 ml-1">/person</span>
+              <span className="text-xs text-muted ml-1">/person</span>
             </div>
 
             <p className="flex justify-start items-center gap-1">
-              {" "}
-              <Star className="w-5 h-5 mt-[-1px] text-blue-700 " /> 4.47 <small>(102)</small>{" "}
+              <Star className="w-5 h-5 mt-[-1px] text-tour" /> 4.47 <small>(102)</small>
             </p>
           </div>
           {/* Button */}
           <Link
             href={`/main/tours/${tour._id}`}
-            className="block w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white text-center rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+            className="block w-full py-2.5 px-4 bg-gradient-to-r from-tour to-tour-400 hover:from-tour-600 hover:to-tour-500 text-white text-center rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
           >
             View Details
           </Link>

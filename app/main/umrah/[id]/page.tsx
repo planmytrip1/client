@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import { useGetUmrahByIdQuery } from '@/store/features/api/umrahApi';
-import Image from 'next/image';
-import { useState } from 'react';
-import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Star, Plane, Users, Utensils, FileText } from 'lucide-react';
-import { use } from 'react';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import HotelDetails from '@/components/common/HotelDetails';
-import ItineraryTimeline from '@/components/common/ItineraryTimeline';
+import { useGetUmrahByIdQuery } from "@/store/features/api/umrahApi";
+import Image from "next/image";
+import { useState } from "react";
+import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Star, Plane, Users, Utensils, FileText } from "lucide-react";
+import { use } from "react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import HotelDetails from "@/components/common/HotelDetails";
+import ItineraryTimeline from "@/components/common/ItineraryTimeline";
 import ReviewSection from "@/components/common/ReviewSection";
 
 export default function UmrahDetailsPage({ params }: { params: { id: string } }) {
   // Unwrap the params with React.use()
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
+
+  // const { data: umrah, isLoading, error } = useGetUmrahByIdQuery(id);
   const { data: umrah, isLoading, error } = useGetUmrahByIdQuery(resolvedParams.id);
   const [activeImage, setActiveImage] = useState(0);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
 
   if (isLoading) {
     return (
@@ -41,30 +43,13 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
           {umrah.images && umrah.images.length > 0 ? (
             <div>
               <div className="relative h-[400px]">
-                <Image
-                  src={`${process.env.NEXT_PUBLIC_API_URL}/images/umrah/${umrah.images[activeImage]}`}
-                  alt={umrah.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                <Image src={`${process.env.NEXT_PUBLIC_API_URL}/images/umrah/${umrah.images[activeImage]}`} alt={umrah.title} fill className="object-cover" priority />
               </div>
               {umrah.images.length > 1 && (
                 <div className="flex overflow-x-auto gap-2 p-2 bg-gray-100">
                   {umrah.images.map((image, index) => (
-                    <div
-                      key={index}
-                      onClick={() => setActiveImage(index)}
-                      className={`relative h-16 w-24 flex-shrink-0 cursor-pointer ${
-                        activeImage === index ? 'ring-2 ring-blue-600' : ''
-                      }`}
-                    >
-                      <Image
-                        src={`${process.env.NEXT_PUBLIC_API_URL}/images/umrah/${image}`}
-                        alt={`Umrah image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                    <div key={index} onClick={() => setActiveImage(index)} className={`relative h-16 w-24 flex-shrink-0 cursor-pointer ${activeImage === index ? "ring-2 ring-umrah" : ""}`}>
+                      <Image src={`${process.env.NEXT_PUBLIC_API_URL}/images/umrah/${image}`} alt={`Umrah image ${index + 1}`} fill className="object-cover" />
                     </div>
                   ))}
                 </div>
@@ -73,12 +58,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
           ) : (
             <div className="h-[400px] bg-gray-200 flex items-center justify-center">
               <div className="relative h-[400px] w-full">
-                <Image
-                  src="/images/umrah-default.jpg"
-                  alt={umrah.title}
-                  fill
-                  className="object-cover"
-                />
+                <Image src="/images/umrah-default.jpg" alt={umrah.title} fill className="object-cover" />
               </div>
             </div>
           )}
@@ -92,39 +72,33 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
             <span>{umrah.duration}</span>
           </div>
           <div className="flex items-center mb-4">
-            <Star className="h-5 w-5 text-yellow-500 mr-1" />
+            <Star className="h-5 w-5 text-umrah mr-1" />
             <span className="text-gray-700 font-medium">4.5 (18 reviews)</span>
           </div>
 
           {/* Package Highlights */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="flex items-center p-3 bg-blue-50 rounded-lg">
-              <Calendar className="h-5 w-5 text-blue-600 mr-2" />
+            <div className="flex items-center p-3 bg-umrah-50 rounded-lg">
+              <Calendar className="h-5 w-5 text-umrah mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Duration</p>
                 <p className="font-medium">{umrah.duration}</p>
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-indigo-50 rounded-lg">
-              <DollarSign className="h-5 w-5 text-indigo-600 mr-2" />
+            <div className="flex items-center p-3 bg-umrah-50 rounded-lg">
+              <DollarSign className="h-5 w-5 text-umrah mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Starting Price</p>
-                <p className="font-medium">
-                  ৳ {umrah.startingPrice.toLocaleString()}
-                </p>
+                <p className="font-medium">৳ {umrah.startingPrice.toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-teal-50 rounded-lg">
-              <Users className="h-5 w-5 text-teal-600 mr-2" />
+            <div className="flex items-center p-3 bg-umrah-50 rounded-lg">
+              <Users className="h-5 w-5 text-umrah mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Group Size</p>
-                <p className="font-medium">
-                  {umrah.minimumGroupSize > 0 
-                    ? `Min ${umrah.minimumGroupSize} people` 
-                    : 'Individual/Group'}
-                </p>
+                <p className="font-medium">{umrah.minimumGroupSize > 0 ? `Min ${umrah.minimumGroupSize} people` : "Individual/Group"}</p>
               </div>
             </div>
           </div>
@@ -132,15 +106,11 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
           {/* Tabs */}
           <div className="mb-6 border-b">
             <div className="flex overflow-x-auto">
-              {['overview', 'itinerary', 'hotels', 'flights', 'policies'].map((tab) => (
+              {["overview", "itinerary", "hotels", "flights", "policies"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 font-medium transition-colors ${
-                    activeTab === tab
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-blue-600'
-                  }`}
+                  className={`px-4 py-2 font-medium transition-colors ${activeTab === tab ? "text-umrah border-b-2 border-umrah" : "text-gray-600 hover:text-umrah"}`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
@@ -150,11 +120,11 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
 
           {/* Tab Content */}
           <div className="mb-6">
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div>
                 <h2 className="text-xl font-semibold mb-3">Description</h2>
                 <p className="text-gray-700 mb-6">{umrah.description}</p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Includes */}
                   {umrah.packageIncludes && umrah.packageIncludes.length > 0 && (
@@ -163,7 +133,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                       <ul className="space-y-2">
                         {umrah.packageIncludes.map((item, index) => (
                           <li key={index} className="flex items-start">
-                            <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                            <CheckCircle className="h-5 w-5 text-umrah mr-2 flex-shrink-0 mt-0.5" />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -186,18 +156,18 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                     </div>
                   )}
                 </div>
-                
+
                 {/* Meals */}
                 {umrah.meals && (
                   <div className="mt-6">
                     <h2 className="text-xl font-semibold mb-3">Meals</h2>
                     <div className="p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center mb-3">
-                        <Utensils className="h-5 w-5 text-blue-600 mr-2" />
+                        <Utensils className="h-5 w-5 text-umrah mr-2" />
                         <h3 className="font-medium text-lg">Meal Plan</h3>
                       </div>
                       <p className="mb-2 text-gray-700">
-                        <span className="font-medium">Status:</span> {umrah.meals.included ? 'Included' : 'Not included'}
+                        <span className="font-medium">Status:</span> {umrah.meals.included ? "Included" : "Not included"}
                       </p>
                       {umrah.meals.mealPlan && (
                         <p className="mb-2 text-gray-700">
@@ -214,7 +184,9 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                           <p className="font-medium mb-1">Menu Options:</p>
                           <ul className="list-disc pl-5 text-gray-700">
                             {umrah.meals.menuOptions.map((option, idx) => (
-                              <li key={idx} className="mb-1">{option}</li>
+                              <li key={idx} className="mb-1">
+                                {option}
+                              </li>
                             ))}
                           </ul>
                         </div>
@@ -222,26 +194,26 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                     </div>
                   </div>
                 )}
-                
+
                 {/* Requirements */}
                 {umrah.umrahRequirements && (
                   <div className="mt-6">
                     <h2 className="text-xl font-semibold mb-3">Visa Requirements</h2>
                     <div className="p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center mb-3">
-                        <FileText className="h-5 w-5 text-blue-600 mr-2" />
+                        <FileText className="h-5 w-5 text-umrah mr-2" />
                         <h3 className="font-medium text-lg">Documents & Requirements</h3>
                       </div>
                       {umrah.umrahRequirements.passport && (
                         <div className="mb-4">
                           <p className="font-medium mb-1">Passport:</p>
-                          <p className="text-gray-700 mb-2">
-                            Validity: {umrah.umrahRequirements.passport.validityRequired}
-                          </p>
+                          <p className="text-gray-700 mb-2">Validity: {umrah.umrahRequirements.passport.validityRequired}</p>
                           {umrah.umrahRequirements.passport.additionalRequirements.length > 0 && (
                             <ul className="list-disc pl-5 text-gray-700">
                               {umrah.umrahRequirements.passport.additionalRequirements.map((req, idx) => (
-                                <li key={idx} className="mb-1">{req}</li>
+                                <li key={idx} className="mb-1">
+                                  {req}
+                                </li>
                               ))}
                             </ul>
                           )}
@@ -250,13 +222,13 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                       {umrah.umrahRequirements.photos && (
                         <div>
                           <p className="font-medium mb-1">Photos:</p>
-                          <p className="text-gray-700 mb-2">
-                            Quantity: {umrah.umrahRequirements.photos.quantity} photo(s)
-                          </p>
+                          <p className="text-gray-700 mb-2">Quantity: {umrah.umrahRequirements.photos.quantity} photo(s)</p>
                           {umrah.umrahRequirements.photos.specifications.length > 0 && (
                             <ul className="list-disc pl-5 text-gray-700">
                               {umrah.umrahRequirements.photos.specifications.map((spec, idx) => (
-                                <li key={idx} className="mb-1">{spec}</li>
+                                <li key={idx} className="mb-1">
+                                  {spec}
+                                </li>
                               ))}
                             </ul>
                           )}
@@ -265,7 +237,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                     </div>
                   </div>
                 )}
-                
+
                 {/* Date Options */}
                 {umrah.dateOptions && (
                   <div className="mt-6">
@@ -276,7 +248,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                           <p className="font-medium mb-2">Group Travel Dates:</p>
                           <div className="flex flex-wrap gap-2">
                             {umrah.dateOptions.groupTravelDates.map((date, idx) => (
-                              <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                              <span key={idx} className="px-3 py-1 bg-umrah-100 text-umrah-800 rounded-full text-sm">
                                 {date}
                               </span>
                             ))}
@@ -284,27 +256,22 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                         </div>
                       )}
                       <p className="text-gray-700 mb-2">
-                        <span className="font-medium">Custom Dates Available:</span> {umrah.dateOptions.customDatesAvailable ? 'Yes' : 'No'}
+                        <span className="font-medium">Custom Dates Available:</span> {umrah.dateOptions.customDatesAvailable ? "Yes" : "No"}
                       </p>
-                      {/* {umrah.dateOptions.validityPeriod.start && umrah.dateOptions.validityPeriod.end && (
-                        <p className="text-gray-700">
-                          <span className="font-medium">Validity Period:</span> {umrah.dateOptions.validityPeriod.start} to {umrah.dateOptions.validityPeriod.end}
-                        </p>
-                      )} */}
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            {activeTab === 'itinerary' && (
+            {activeTab === "itinerary" && (
               <div>
                 <h2 className="text-xl font-semibold mb-3">Itinerary</h2>
                 <ItineraryTimeline itinerary={umrah.itinerary} />
               </div>
             )}
 
-            {activeTab === 'hotels' && (
+            {activeTab === "hotels" && (
               <div>
                 <h2 className="text-xl font-semibold mb-3">Hotels</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -315,30 +282,30 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
               </div>
             )}
 
-            {activeTab === 'flights' && (
+            {activeTab === "flights" && (
               <div>
                 <h2 className="text-xl font-semibold mb-3">Flight Options</h2>
                 {umrah.flightOptions && (
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center mb-4">
-                      <Plane className="h-5 w-5 text-blue-600 mr-2" />
+                      <Plane className="h-5 w-5 text-umrah mr-2" />
                       <h3 className="font-medium text-lg">Flight Details</h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="mb-2 text-gray-700">
-                          <span className="font-medium">Direct Flight:</span> {umrah.flightOptions.directFlight ? 'Available' : 'Not available'}
+                          <span className="font-medium">Direct Flight:</span> {umrah.flightOptions.directFlight ? "Available" : "Not available"}
                         </p>
                         <p className="mb-2 text-gray-700">
-                          <span className="font-medium">Transit Flight:</span> {umrah.flightOptions.transitFlight ? 'Available' : 'Not available'}
+                          <span className="font-medium">Transit Flight:</span> {umrah.flightOptions.transitFlight ? "Available" : "Not available"}
                         </p>
                       </div>
                       <div>
                         <p className="mb-2 text-gray-700">
-                          <span className="font-medium">Departure City:</span> {umrah.flightOptions.departureCity || 'Dhaka'}
+                          <span className="font-medium">Departure City:</span> {umrah.flightOptions.departureCity || "Dhaka"}
                         </p>
                         <p className="mb-2 text-gray-700">
-                          <span className="font-medium">Arrival City:</span> {umrah.flightOptions.arrivalCity || 'Jeddah/Madinah'}
+                          <span className="font-medium">Arrival City:</span> {umrah.flightOptions.arrivalCity || "Jeddah/Madinah"}
                         </p>
                       </div>
                     </div>
@@ -347,7 +314,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                         <p className="font-medium mb-2">Available Airlines:</p>
                         <div className="flex flex-wrap gap-2">
                           {umrah.flightOptions.airlines.map((airline, idx) => (
-                            <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                            <span key={idx} className="px-3 py-1 bg-umrah-100 text-umrah-800 rounded-full text-sm">
                               {airline}
                             </span>
                           ))}
@@ -359,7 +326,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
               </div>
             )}
 
-            {activeTab === 'policies' && (
+            {activeTab === "policies" && (
               <div>
                 <h2 className="text-xl font-semibold mb-3">Policies</h2>
                 {umrah.policies?.payment && umrah.policies.payment.length > 0 && (
@@ -367,40 +334,48 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                     <h3 className="font-medium text-lg mb-2">Payment Policy</h3>
                     <ul className="list-disc pl-5">
                       {umrah.policies.payment.map((item, idx) => (
-                        <li key={idx} className="mb-1">{item}</li>
+                        <li key={idx} className="mb-1">
+                          {item}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                
+
                 {umrah.policies?.cancellation && umrah.policies.cancellation.length > 0 && (
                   <div className="mb-4">
                     <h3 className="font-medium text-lg mb-2">Cancellation Policy</h3>
                     <ul className="list-disc pl-5">
                       {umrah.policies.cancellation.map((item, idx) => (
-                        <li key={idx} className="mb-1">{item}</li>
+                        <li key={idx} className="mb-1">
+                          {item}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                
+
                 {umrah.policies?.visa && umrah.policies.visa.length > 0 && (
                   <div className="mb-4">
                     <h3 className="font-medium text-lg mb-2">Visa Policy</h3>
                     <ul className="list-disc pl-5">
                       {umrah.policies.visa.map((item, idx) => (
-                        <li key={idx} className="mb-1">{item}</li>
+                        <li key={idx} className="mb-1">
+                          {item}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                
+
                 {umrah.policies?.general && umrah.policies.general.length > 0 && (
                   <div>
                     <h3 className="font-medium text-lg mb-2">General Policy</h3>
                     <ul className="list-disc pl-5">
                       {umrah.policies.general.map((item, idx) => (
-                        <li key={idx} className="mb-1">{item}</li>
+                        <li key={idx} className="mb-1">
+                          {item}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -410,20 +385,20 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
           </div>
 
           {/* Pricing Section */}
-          <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+          <div className="mt-8 p-6 bg-umrah-50/50 rounded-xl">
             <h2 className="text-xl font-semibold mb-4">Pricing</h2>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="text-left p-3 bg-gray-100">Package Type</th>
-                    <th className="text-left p-3 bg-gray-100">Accommodation Type</th>
-                    <th className="text-left p-3 bg-gray-100">Price (BDT)</th>
+                    <th className="text-left p-3 bg-umrah-100/70">Package Type</th>
+                    <th className="text-left p-3 bg-umrah-100/70">Accommodation Type</th>
+                    <th className="text-left p-3 bg-umrah-100/70">Price (BDT)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {umrah.pricing.map((price, priceIndex) => (
+                  {umrah.pricing.map((price, priceIndex) =>
                     price.priceDetails.map((detail, detailIndex) => (
                       <tr key={`${priceIndex}-${detailIndex}`} className="border-b border-gray-200">
                         {detailIndex === 0 && (
@@ -435,7 +410,7 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
                         <td className="p-3 font-medium">৳ {detail.price.toLocaleString()}</td>
                       </tr>
                     ))
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -443,12 +418,8 @@ export default function UmrahDetailsPage({ params }: { params: { id: string } })
 
           {/* Book Now Button */}
           <div className="mt-8 flex flex-col md:flex-row gap-4 items-center">
-            <button className="w-full md:w-auto py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg">
-              Book This Package
-            </button>
-            <button className="w-full md:w-auto py-3 px-8 border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-colors">
-              Download Brochure
-            </button>
+            <button className="w-full md:w-auto py-3 px-8 bg-umrah hover:bg-umrah-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg">Book This Package</button>
+            <button className="w-full md:w-auto py-3 px-8 border border-umrah text-umrah hover:bg-umrah-50 font-medium rounded-lg transition-colors">Download Brochure</button>
           </div>
         </div>
 

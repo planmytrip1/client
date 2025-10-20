@@ -21,18 +21,17 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// export default nextConfig;
 
 // /** @type {import('next').NextConfig} */
 // const nextConfig = {
 //   images: {
-//     domains: ['admin.amanatoursandtravels.com'],
+//     domains: ['amanatoursandtravels.com'],
 //     remotePatterns: [
 //       {
 //         protocol: 'https',
-//         hostname: 'admin.amanatoursandtravels.com',
-//         port: 443,  // HTTPS e port lagbe na
-//         pathname: '/api/images/**',
+//         hostname: 'amanatoursandtravels.com',
+//         pathname: '/api/images/**', // port remove kore dilam
 //       },
 //     ],
 //   },
@@ -40,10 +39,11 @@ export default nextConfig;
 //     return [
 //       {
 //         source: '/api/:path*',
-//         destination: 'https://admin.amanatoursandtravels.com/api/:path*',
+//         destination: 'https://amanatoursandtravels.com/api/:path*',
 //       },
 //     ];
 //   },
 // };
 
-// export default nextConfig;
+export default nextConfig;
+

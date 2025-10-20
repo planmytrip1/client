@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
 import { useGetToursQuery } from "@/store/features/api/tourApi";
 import TourCard from "@/components/tours/TourCard";
 import { ITour } from '@/lib/types/ITour';
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { Search } from "lucide-react";
 
 export default function ToursPage() {
   const { data: tours = [], isLoading, error } = useGetToursQuery();
@@ -16,10 +17,9 @@ export default function ToursPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const months = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December'
-];
-
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+  ];
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,47 +29,45 @@ export default function ToursPage() {
   const [filteredTours, setFilteredTours] = useState<ITour[]>([]);
 
   useEffect(() => {
-  if (!tours) return;
+    if (!tours) return;
 
-  let filtered = tours;
+    let filtered = tours;
 
-  if (searchTerm) {
-    filtered = filtered.filter(
-      (t) =>
-        t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (t.destination && t.destination.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (t.description && t.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  }
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (t) =>
+          t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (t.destination && t.destination.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (t.description && t.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
 
-  if (selectedDestination) {
-    filtered = filtered.filter((t) => t.destination === selectedDestination);
-  }
+    if (selectedDestination) {
+      filtered = filtered.filter((t) => t.destination === selectedDestination);
+    }
 
-  if (selectedMonth) {
-    const monthIndex = months.indexOf(selectedMonth);
-    filtered = filtered.filter(
-      (t) => new Date(t.startDate).getMonth() === monthIndex
-    );
-  }
+    if (selectedMonth) {
+      const monthIndex = months.indexOf(selectedMonth);
+      filtered = filtered.filter(
+        (t) => new Date(t.startDate).getMonth() === monthIndex
+      );
+    }
 
-  if (priceRange.min) {
-    filtered = filtered.filter(
-      (t) => t.pricePerPerson >= Number(priceRange.min)
-    );
-  }
+    if (priceRange.min) {
+      filtered = filtered.filter(
+        (t) => t.pricePerPerson >= Number(priceRange.min)
+      );
+    }
 
-  if (priceRange.max) {
-    filtered = filtered.filter(
-      (t) => t.pricePerPerson <= Number(priceRange.max)
-    );
-  }
+    if (priceRange.max) {
+      filtered = filtered.filter(
+        (t) => t.pricePerPerson <= Number(priceRange.max)
+      );
+    }
 
-  setFilteredTours(filtered);
-  setCurrentPage(1);
-
-}, [tours, searchTerm, selectedDestination, selectedMonth, priceRange]);
-
+    setFilteredTours(filtered);
+    setCurrentPage(1);
+  }, [tours, searchTerm, selectedDestination, selectedMonth, priceRange]);
 
   // Pagination logic
   const indexOfLastTour = currentPage * toursPerPage;
@@ -82,7 +80,7 @@ export default function ToursPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Explore Our Tours</h1>
+      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-tour to-tour-400 text-transparent bg-clip-text">Explore Our Tours</h1>
 
       {/* Search + Filter Toggle */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -92,14 +90,14 @@ export default function ToursPage() {
             placeholder="Search tours..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
           />
           <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
         </div>
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-tour text-white rounded-lg hover:bg-tour-600 transition"
         >
           Filters
         </button>
@@ -112,7 +110,7 @@ export default function ToursPage() {
           <select
             value={selectedDestination}
             onChange={(e) => setSelectedDestination(e.target.value)}
-            className="p-2 border border-gray-300 rounded-lg"
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
           >
             <option value="">All Destinations</option>
             {destinations.map((dest) => (
@@ -126,7 +124,7 @@ export default function ToursPage() {
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="p-2 border border-gray-300 rounded-lg"
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
           >
             <option value="">All Months</option>
             <option value="January">January</option>
@@ -152,7 +150,7 @@ export default function ToursPage() {
               onChange={(e) =>
                 setPriceRange({ ...priceRange, min: e.target.value })
               }
-              className="w-1/2 p-2 border border-gray-300 rounded-lg"
+              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
             />
             <span>to</span>
             <input
@@ -162,7 +160,7 @@ export default function ToursPage() {
               onChange={(e) =>
                 setPriceRange({ ...priceRange, max: e.target.value })
               }
-              className="w-1/2 p-2 border border-gray-300 rounded-lg"
+              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tour focus:border-tour"
             />
           </div>
         </div>
@@ -171,8 +169,7 @@ export default function ToursPage() {
       {/* Tour Cards */}
       {isLoading && (
         <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-2 text-gray-600">Loading tours...</p>
+          <LoadingSpinner />
         </div>
       )}
 
@@ -213,7 +210,7 @@ export default function ToursPage() {
                   onClick={() => setCurrentPage(i + 1)}
                   className={`px-4 py-2 rounded-lg border ${
                     currentPage === i + 1
-                      ? "bg-blue-600 text-white border-blue-600"
+                      ? "bg-tour text-white border-tour"
                       : "bg-white text-gray-700 hover:bg-gray-100 border-gray-300"
                   }`}
                 >

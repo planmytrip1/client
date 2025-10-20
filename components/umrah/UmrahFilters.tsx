@@ -70,14 +70,14 @@ export default function UmrahFilters({ packages, onFilterChange }: UmrahFiltersP
             placeholder="Search umrah packages..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-umrah focus:border-umrah"
           />
           <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
         </div>
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-umrah text-white rounded-lg hover:bg-umrah-600 transition"
         >
           Filters
         </button>
@@ -90,7 +90,7 @@ export default function UmrahFilters({ packages, onFilterChange }: UmrahFiltersP
           <select
             value={selectedPackageType}
             onChange={(e) => setSelectedPackageType(e.target.value)}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-umrah focus:border-umrah"
           >
             <option value="">All Package Types</option>
             {packageTypes.map((type) => (
@@ -104,7 +104,7 @@ export default function UmrahFilters({ packages, onFilterChange }: UmrahFiltersP
           <select
             value={selectedDuration}
             onChange={(e) => setSelectedDuration(e.target.value)}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-umrah focus:border-umrah"
           >
             <option value="">All Durations</option>
             {durations.map((duration) => (
@@ -121,7 +121,7 @@ export default function UmrahFilters({ packages, onFilterChange }: UmrahFiltersP
               placeholder="Min"
               value={priceRange.min}
               onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-umrah focus:border-umrah"
             />
             <span>to</span>
             <input
@@ -129,7 +129,7 @@ export default function UmrahFilters({ packages, onFilterChange }: UmrahFiltersP
               placeholder="Max"
               value={priceRange.max}
               onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-1/2 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-umrah focus:border-umrah"
             />
           </div>
 
