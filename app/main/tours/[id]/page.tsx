@@ -11,7 +11,12 @@ import BookingForm from "@/components/common/BookingForm";
 import { generateAndDownloadPDF } from "@/utils/pdfService";
 import { motion, AnimatePresence } from "framer-motion"; // Import for animations
 
-export default function TourDetailsPage({ params }: { params: { id: string } }) {
+export interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+}
+export default function TourDetailsPage({ params, searchParams }: PageProps) {
+// export default function TourDetailsPage({ params }: { params: { id: string } }) {
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: tour, isLoading, error } = useGetTourByIdQuery(resolvedParams.id);
 

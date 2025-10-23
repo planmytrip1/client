@@ -21,7 +21,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import BookingForm from "@/components/common/BookingForm";
 import { generateAndDownloadPDF } from "@/utils/pdfService";
 
-export default function UmrahDetailsPage({ params }: { params: { id: string } }) {
+export interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+}
+export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
+// export default function UmrahDetailsPage({ params }: { params: { id: string } }) {
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: umrah, isLoading, error } = useGetUmrahByIdQuery(resolvedParams.id);
 

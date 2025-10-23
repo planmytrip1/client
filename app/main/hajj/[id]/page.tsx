@@ -14,7 +14,13 @@ import { generateAndDownloadPDF } from "@/utils/pdfService";
 import BookingForm from "@/components/common/BookingForm";
 import { motion, AnimatePresence } from "framer-motion"; // Import for animations
 
-export default function HajjDetailsPage({ params }: { params: { id: string } }) {
+
+export interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+}
+export default function HajjDetailsPage({ params, searchParams }: PageProps) {
+// export default function HajjDetailsPage({ params }: { params: { id: string } }) {
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: hajj, isLoading, error } = useGetHajjByIdQuery(resolvedParams.id);
 
