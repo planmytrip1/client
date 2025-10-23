@@ -10,6 +10,7 @@ import { X } from "lucide-react";
  * @param {string} props.title - Title for the booking form
  * @param {string} props.type - Type of booking (tour, hajj, umrah)
  * @param {string} props.itemName - Name of the item being booked
+ * @param {string} props.itemId - Name of the item being booked
  * @param {function} props.onClose - Function to close the modal
  */
 const BookingForm = ({ title, type, itemName, itemId, onClose }) => {
@@ -41,7 +42,7 @@ const BookingForm = ({ title, type, itemName, itemId, onClose }) => {
 
     try {
       // In the future, replace this with your API call
-      // await bookingApi.create({ ...formData, itemId, type });
+      await bookingApi.create({ ...formData, itemId, type });
       
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));

@@ -47,7 +47,7 @@ export default function RegisterPage() {
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 py-12">
-      <div className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8 border border-gray-100 animate-fade-in">
+      <div className="w-full max-w-xl bg-white shadow-xl rounded-2xl p-8 border border-gray-100 animate-fade-in">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-primary-600">Create an Account</h2>
           <p className="text-gray-600 mt-1">

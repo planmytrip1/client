@@ -368,7 +368,7 @@ export default function TourDetailsPage({ params }: { params: { id: string } }) 
           title={`Book ${tour.title}`}
           type="tour"
           itemName={tour.title}
-          // itemId={tour._id}
+          itemId={tour._id || ""}
           onClose={() => setShowBookingForm(false)}
         />
       )}

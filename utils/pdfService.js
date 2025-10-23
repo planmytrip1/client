@@ -1,313 +1,689 @@
-// Import jsPDF for PDF generation
-import { jsPDF } from "jspdf";
+import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-/**
- * Generate a PDF voucher/brochure for a tour/package
- * @param {object} item - The tour or package data
- * @param {string} type - The type of package (tour, hajj, umrah)
- * @returns {Promise<Blob>} - The generated PDF as a Blob
- */
-export const generatePackagePDF = (item, type = "tour") => {
-  return new Promise((resolve) => {
-    // Create a new jsPDF instance
-    const doc = new jsPDF();
-    
-    // Add company logo and header
-    // In a real implementation, you would add your company logo here
-    doc.setFontSize(20);
-    doc.setTextColor(10, 34, 64); // primary color
-    doc.text("Amana Tours & Travels", 105, 20, { align: "center" });
-    
-    doc.setFontSize(12);
-    doc.setTextColor(100, 100, 100);
-    doc.text("A Journey With Trust", 105, 28, { align: "center" });
-    
-    // Add a horizontal line
-    doc.setDrawColor(242, 156, 31); // secondary color
-    doc.setLineWidth(0.5);
-    doc.line(20, 35, 190, 35);
-    
-    // Package title
-    doc.setFontSize(16);
-    doc.setTextColor(10, 34, 64);
-    doc.text(item.title, 105, 45, { align: "center" });
-    
-    // Package image if available
-    if (item.images && item.images.length > 0) {
-      try {
-        // In a real implementation, you'd need to load the image properly
-        // This is a simplified placeholder
-        // const img = new Image();
-        // img.src = `${process.env.NEXT_PUBLIC_API_URL}/images/${type}/${item.images[0]}`;
-        // doc.addImage(img, 'JPEG', 20, 50, 170, 80);
-        
-        // For now, we'll just add a placeholder text
-        doc.setFontSize(10);
-        doc.setTextColor(150, 150, 150);
-        doc.text("* Package image would appear here *", 105, 60, { align: "center" });
-      } catch (err) {
-        console.error("Error adding image to PDF:", err);
-      }
+// ✅ Attach plugin manually
+jsPDF.autoTable = autoTable;
+
+export const generateAndDownloadPDF = (data, type) => {
+  const doc = new jsPDF();
+
+  // Set common PDF styles
+  doc.setFont('helvetica');
+
+  switch (type) {
+    case "tour":
+      generateTourPDF(doc, data);
+      break;
+    case "hajj":
+      generateHajjPDF(doc, data);
+      break;
+    case "umrah":
+      generateUmrahPDF(doc, data);
+      break;
+    default:
+      generateGenericPDF(doc, data);
+  }
+
+  // Download the PDF with a formatted name
+  doc.save(`${type}-${data.title.replace(/\s+/g, '-').toLowerCase()}-details.pdf`);
+};
+
+// Header Design: Company name and tagline
+const addHeader = (doc) => {
+  // Gradient-like background using rectangles
+  doc.setFillColor(41, 128, 185); // Blue tone
+  doc.rect(0, 0, 210, 25, "F"); // full-width header bar
+
+  // Company Name
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Amana Tours and Travels', 105, 12, { align: 'center' });
+
+  // Tagline
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(11);
+  doc.setTextColor(230, 230, 230);
+  doc.text('A Journey with Trust', 105, 19, { align: 'center' });
+
+  // Leave a little space for rest of content
+  doc.setTextColor(0, 0, 0);
+  return 30; // starting y position for next section
+};
+
+
+// Helper function to add section header
+const addSectionTitle = (doc, title, y) => {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(44, 62, 80); // Dark blue color
+  doc.text(title, 14, y);
+  doc.setDrawColor(41, 128, 185); // Blue line
+  doc.setLineWidth(0.5);
+  doc.line(14, y + 1, 196, y + 1);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  return y + 10;
+};
+
+// Helper to add list items
+const addListItems = (doc, items, y, title) => {
+  if (!items || items.length === 0) return y;
+
+  y = addSectionTitle(doc, title, y);
+
+  items.forEach((item, index) => {
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
-    
-    // Package details
-    doc.setFontSize(12);
-    doc.setTextColor(60, 60, 60);
-    
-    // Y position tracker
-    let yPos = 75;
-    
-    // Package type-specific information
-    if (type === "tour") {
-      // Destination
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Destination:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(item.destination || "N/A", 70, yPos);
-      yPos += 10;
-      
-      // Duration
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Duration:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      
-      if (item.startDate && item.endDate) {
-        const startDate = new Date(item.startDate).toLocaleDateString();
-        const endDate = new Date(item.endDate).toLocaleDateString();
-        doc.text(`${startDate} - ${endDate}`, 70, yPos);
-      } else {
-        doc.text("N/A", 70, yPos);
-      }
-      yPos += 10;
-      
-      // Price
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Price per person:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`${item.currency || "৳"} ${item.pricePerPerson?.toLocaleString() || "N/A"}`, 70, yPos);
-      yPos += 15;
-    } else if (type === "hajj") {
-      // Hajj Year
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Hajj Year:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(item.hajjYear || "N/A", 70, yPos);
-      yPos += 10;
-      
-      // Duration
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Duration:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(item.duration || "N/A", 70, yPos);
-      yPos += 10;
-      
-      // Price
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Starting Price:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`৳ ${item.startingPrice?.toLocaleString() || "N/A"}`, 70, yPos);
-      yPos += 15;
-    } else if (type === "umrah") {
-      // Duration
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Duration:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(item.duration || "N/A", 70, yPos);
-      yPos += 10;
-      
-      // Group Size
-      if (item.minimumGroupSize) {
-        doc.setFontSize(14);
-        doc.setTextColor(10, 34, 64);
-        doc.text("Group Size:", 20, yPos);
-        doc.setTextColor(60, 60, 60);
-        doc.text(`Min ${item.minimumGroupSize} people`, 70, yPos);
-        yPos += 10;
-      }
-      
-      // Price
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Starting Price:", 20, yPos);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`৳ ${item.startingPrice?.toLocaleString() || "N/A"}`, 70, yPos);
-      yPos += 15;
-    }
-    
-    // Description
-    doc.setFontSize(14);
-    doc.setTextColor(10, 34, 64);
-    doc.text("Description:", 20, yPos);
-    yPos += 7;
-    
-    doc.setFontSize(12);
-    doc.setTextColor(60, 60, 60);
-    
-    // Handle long descriptions with text wrapping
-    const splitDescription = doc.splitTextToSize(item.description || "No description available", 170);
-    doc.text(splitDescription, 20, yPos);
-    yPos += (splitDescription.length * 7) + 10;
-    
-    // Package includes/excludes as a table
-    if (item.packageIncludes && item.packageIncludes.length > 0) {
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Package Includes:", 20, yPos);
-      yPos += 7;
-      
-      // Create a table for package includes
-      autoTable(doc, {
-        startY: yPos,
-        head: [],
-        body: item.packageIncludes.map(include => [include]),
-        theme: 'grid',
-        headStyles: { fillColor: [10, 34, 64] },
-        margin: { left: 20, right: 20 },
-        tableWidth: 170,
-      });
-      
-      // Update Y position after table
-      yPos = doc.lastAutoTable.finalY + 10;
-    }
-    
-    if (item.packageExcludes && item.packageExcludes.length > 0) {
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Package Excludes:", 20, yPos);
-      yPos += 7;
-      
-      // Create a table for package excludes
-      autoTable(doc, {
-        startY: yPos,
-        head: [],
-        body: item.packageExcludes.map(exclude => [exclude]),
-        theme: 'grid',
-        headStyles: { fillColor: [10, 34, 64] },
-        margin: { left: 20, right: 20 },
-        tableWidth: 170,
-      });
-      
-      // Update Y position after table
-      yPos = doc.lastAutoTable.finalY + 10;
-    }
-    
-    // Itinerary if available
-    if (item.itinerary && item.itinerary.length > 0) {
-      // Add a new page if we're running out of space
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
-      doc.setFontSize(14);
-      doc.setTextColor(10, 34, 64);
-      doc.text("Itinerary:", 20, yPos);
-      yPos += 7;
-      
-      // Create a table for the itinerary
-      const itineraryData = item.itinerary.map(day => [
-        `Day ${day.day}`,
-        day.activities,
-        day.accommodation ? `Accommodation: ${day.accommodation}` : ""
-      ]);
-      
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Day', 'Activities', 'Accommodation']],
-        body: itineraryData,
-        theme: 'grid',
-        headStyles: { fillColor: [10, 34, 64] },
-        margin: { left: 20, right: 20 },
-        tableWidth: 170,
-      });
-      
-      // Update Y position after table
-      yPos = doc.lastAutoTable.finalY + 10;
-    }
-    
-    // Footer with contact information
-    const pageCount = doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      
-      // Add a horizontal line
-      doc.setDrawColor(242, 156, 31);
-      doc.setLineWidth(0.5);
-      doc.line(20, 280, 190, 280);
-      
-      // Contact info
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text("Amana Tours & Travels | Phone: +880 1324-418968", 105, 287, { align: "center" });
-      doc.text("Email: amanatours&travel.com | www.amanatourstravel.com", 105, 293, { align: "center" });
-      
-      // Page numbers
-      doc.text(`Page ${i} of ${pageCount}`, 185, 280, { align: "right" });
-    }
-    
-    // Generate the PDF as a blob and resolve the promise
-    const pdfBlob = doc.output('blob');
-    resolve(pdfBlob);
+    doc.setFontSize(10);
+    doc.text(`• ${item}`, 18, y);
+    y += 6;
   });
+
+  return y + 5;
 };
 
-/**
- * Download the PDF with the given filename
- * @param {Blob} pdfBlob - The PDF blob to download
- * @param {string} filename - The name of the downloaded file
- */
-export const downloadPDF = (pdfBlob, filename) => {
-  // Create a URL for the blob
-  const blobUrl = URL.createObjectURL(pdfBlob);
-  
-  // Create a temporary link element
-  const link = document.createElement('a');
-  link.href = blobUrl;
-  link.download = filename;
-  
-  // Append the link to the body
-  document.body.appendChild(link);
-  
-  // Trigger the download
-  link.click();
-  
-  // Clean up
-  document.body.removeChild(link);
-  URL.revokeObjectURL(blobUrl);
-};
+// Tour PDF Generator
+const generateTourPDF = (doc, tourData) => {
 
-/**
- * Generate and download a package PDF
- * @param {object} item - The tour or package data
- * @param {string} type - The type of package (tour, hajj, umrah)
- */
-export const generateAndDownloadPDF = async (item, type = "tour") => {
-  try {
-    // Generate the PDF
-    const pdfBlob = await generatePackagePDF(item, type);
-    
-    // Create a filename
-    const sanitizedTitle = (item.title || "package").replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const filename = `${type}_${sanitizedTitle}.pdf`;
-    
-    // Download the PDF
-    downloadPDF(pdfBlob, filename);
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    alert("There was an error generating the PDF. Please try again.");
+  let y = addHeader(doc);
+  y += 10;
+
+  // Header with logo and title
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('TOUR PACKAGE DETAILS', 105, y, { align: 'center' });
+
+  // Title and basic info
+  y += 10
+  doc.setFontSize(16);
+  doc.text(tourData.title, 105, y, { align: 'center' });
+
+  // Move down again before next section
+  y += 15;
+
+  // Basic details section
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Destination:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(tourData.destination || 'Not specified', 50, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Duration:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  const startDate = new Date(tourData.startDate).toLocaleDateString();
+  const endDate = new Date(tourData.endDate).toLocaleDateString();
+  doc.text(`${startDate} to ${endDate}`, 50, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Price per person:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${tourData.currency || 'BDT'} ${tourData.pricePerPerson}`, 50, y);
+  y += 15;
+
+  // Description
+  y = addSectionTitle(doc, 'Description', y);
+  doc.setFontSize(10);
+  const descriptionLines = doc.splitTextToSize(tourData.description || 'No description available.', 180);
+  doc.text(descriptionLines, 14, y);
+  y += descriptionLines.length * 5 + 10;
+
+  // Locations
+  if (tourData.locations && tourData.locations.length > 0) {
+    y = addSectionTitle(doc, 'Locations', y);
+    const locationText = tourData.locations.join(', ');
+    const locationLines = doc.splitTextToSize(locationText, 180);
+    doc.text(locationLines, 14, y);
+    y += locationLines.length * 5 + 10;
+  }
+
+  // Itinerary
+  if (tourData.itinerary && tourData.itinerary.length > 0) {
+    y = addSectionTitle(doc, 'Itinerary', y);
+
+    tourData.itinerary.forEach((day, index) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Day ${day.day}`, 14, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+
+      const activityLines = doc.splitTextToSize(day.activities, 180);
+      doc.text(activityLines, 14, y + 5);
+
+      y += activityLines.length * 5 + 10;
+
+      if (day.accommodation) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Accommodation: ${day.accommodation}`, 18, y);
+        y += 6;
+      }
+
+      y += 5;
+    });
+  }
+
+  // Package Includes
+  y = addListItems(doc, tourData.packageIncludes, y, 'Package Includes');
+
+  // Package Excludes
+  y = addListItems(doc, tourData.packageExcludes, y, 'Package Excludes');
+
+  // Available Coupons
+  if (tourData.coupons && tourData.coupons.length > 0) {
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Available Coupons', y);
+
+    tourData.coupons.forEach((coupon, index) => {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(coupon.name, 14, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const discountText = coupon.type === 'percentage' ? `${coupon.value}% discount` : `${tourData.currency} ${coupon.value} off`;
+      doc.text(discountText, 14, y + 5);
+      y += 12;
+    });
+  }
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+    doc.text('Contact for booking: +880 1324-418968', 105, 285, { align: 'center' });
   }
 };
 
-export default {
-  generatePackagePDF,
-  downloadPDF,
-  generateAndDownloadPDF
+// Hajj PDF Generator
+const generateHajjPDF = (doc, hajjData) => {
+  let y = addHeader(doc);
+  y += 10;
+
+  // Header
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('HAJJ PACKAGE DETAILS', 105, y, { align: 'center' });
+
+  // Title and basic info
+  y += 10;
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'normal');
+  doc.text(hajjData.title, 105, y, { align: 'center' });
+
+  y += 8;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Hajj Year: ${hajjData.hajjYear}`, 105, y, { align: 'center' });
+
+  // Move down again before next section
+  y += 15;
+
+
+  // Basic details section
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Duration:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(hajjData.duration || 'Not specified', 80, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Starting Price:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Taka ${hajjData.startingPrice.toLocaleString()}`, 80, y);
+  y += 15;
+
+  // Description
+  y = addSectionTitle(doc, 'Description', y);
+  doc.setFontSize(10);
+  const descriptionLines = doc.splitTextToSize(hajjData.description || 'No description available.', 180);
+  doc.text(descriptionLines, 14, y);
+  y += descriptionLines.length * 5 + 10;
+
+  // Hajj Accommodations
+  if (hajjData.hajjAccommodations) {
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Hajj Accommodations', y);
+
+    const accommodations = [
+      { name: 'Mina', data: hajjData.hajjAccommodations.mina },
+      { name: 'Arafat', data: hajjData.hajjAccommodations.arafat },
+      { name: 'Muzdalifah', data: hajjData.hajjAccommodations.muzdalifah }
+    ];
+
+    accommodations.forEach(acc => {
+      if (acc.data) {
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(acc.name, 14, y);
+        y += 6;
+
+        if (acc.data.accommodationType) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Type: ${acc.data.accommodationType}`, 18, y);
+          y += 5;
+        }
+
+        if (acc.data.distance) {
+          doc.setFontSize(10);
+          doc.text(`Distance: ${acc.data.distance}`, 18, y);
+          y += 5;
+        }
+
+        if (acc.data.amenities && acc.data.amenities.length) {
+          doc.setFontSize(10);
+          doc.text(`Amenities: ${acc.data.amenities.join(', ')}`, 18, y);
+          y += 10;
+        } else {
+          y += 5;
+        }
+      }
+    });
+  }
+
+  // Kurbani Details
+  if (hajjData.kurbani) {
+    y = addSectionTitle(doc, 'Kurbani Details', y);
+
+    doc.setFontSize(10);
+    doc.text(`Included: ${hajjData.kurbani.included ? 'Yes' : 'No'}`, 14, y);
+    y += 5;
+
+    if (hajjData.kurbani.included && hajjData.kurbani.type) {
+      doc.text(`Type: ${hajjData.kurbani.type}`, 14, y);
+      y += 10;
+    } else {
+      y += 5;
+    }
+  }
+
+  // Package Includes
+  y = addListItems(doc, hajjData.packageIncludes, y, 'Package Includes');
+
+  // Package Excludes
+  y = addListItems(doc, hajjData.packageExcludes, y, 'Package Excludes');
+
+  // Pricing Table
+  if (hajjData.pricing && hajjData.pricing.length > 0) {
+    if (y > 200) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Pricing Details', y);
+
+    const pricingData = [];
+    hajjData.pricing.forEach(packageItem => {
+      packageItem.priceDetails.forEach((detail, index) => {
+        pricingData.push([
+          index === 0 ? packageItem.packageType : '',
+          detail.accommodationType,
+          `Tk ${detail.price.toLocaleString()}`
+        ]);
+      });
+    });
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Package Type', 'Accommodation Type', 'Price (BDT)']],
+      body: pricingData,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] }
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+  }
+
+  // Policies
+  if (hajjData.policies) {
+    if (y > 220) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Policies', y);
+
+    const policyTypes = [
+      { key: 'payment', name: 'Payment Policy' },
+      { key: 'cancellation', name: 'Cancellation Policy' },
+      { key: 'visa', name: 'Visa Policy' },
+      { key: 'general', name: 'General Policy' }
+    ];
+
+    policyTypes.forEach(policy => {
+      if (hajjData.policies[policy.key] && hajjData.policies[policy.key].length > 0) {
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(policy.name, 14, y);
+        y += 5;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+
+        hajjData.policies[policy.key].forEach((item, index) => {
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+
+          const itemLines = doc.splitTextToSize(`• ${item}`, 180);
+          doc.text(itemLines, 18, y);
+          y += itemLines.length * 5 + 2;
+        });
+
+        y += 5;
+      }
+    });
+  }
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+    doc.text('Contact for booking: +880 1324-418968', 105, 285, { align: 'center' });
+  }
+};
+
+// Umrah PDF Generator
+const generateUmrahPDF = (doc, umrahData) => {
+
+  let y = addHeader(doc);
+  y += 10;
+
+  // Header
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('UMRAH PACKAGE DETAILS', 105, y, { align: 'center' });
+
+  // Title and basic info
+  y += 10;
+  doc.setFontSize(16);
+  doc.text(umrahData.title, 105, y, { align: 'center' });
+
+  // Move down again before next section
+  y += 15;
+
+  // Basic details section
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Duration:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(umrahData.duration || 'Not specified', 80, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Starting Price:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Taka ${umrahData.startingPrice.toLocaleString()}`, 80, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Group Size:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(umrahData.minimumGroupSize > 0 ? `Minimum ${umrahData.minimumGroupSize} people` : 'Individual/Group', 80, y);
+  y += 15;
+
+  // Description
+  y = addSectionTitle(doc, 'Description', y);
+  doc.setFontSize(10);
+  const descriptionLines = doc.splitTextToSize(umrahData.description || 'No description available.', 180);
+  doc.text(descriptionLines, 14, y);
+  y += descriptionLines.length * 5 + 10;
+
+  // Travel Dates
+  if (umrahData.dateOptions && umrahData.dateOptions.groupTravelDates && umrahData.dateOptions.groupTravelDates.length > 0) {
+    y = addSectionTitle(doc, 'Group Travel Dates', y);
+
+    umrahData.dateOptions.groupTravelDates.forEach((date, index) => {
+      doc.setFontSize(10);
+      doc.text(`• ${date}`, 14, y);
+      y += 6;
+    });
+
+    doc.text(`Custom Dates Available: ${umrahData.dateOptions.customDatesAvailable ? 'Yes' : 'No'}`, 14, y);
+    y += 10;
+  }
+
+  // Package Includes
+  y = addListItems(doc, umrahData.packageIncludes, y, 'Package Includes');
+
+  // Package Excludes
+  y = addListItems(doc, umrahData.packageExcludes, y, 'Package Excludes');
+
+  // Umrah Requirements
+  if (umrahData.umrahRequirements) {
+    if (y > 220) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Umrah Requirements', y);
+
+    if (umrahData.umrahRequirements.passport) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Passport Requirements:', 14, y);
+      y += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Passport Validity: ${umrahData.umrahRequirements.passport.validityRequired}`, 18, y);
+      y += 5;
+
+      if (umrahData.umrahRequirements.passport.additionalRequirements && umrahData.umrahRequirements.passport.additionalRequirements.length > 0) {
+        umrahData.umrahRequirements.passport.additionalRequirements.forEach((req, index) => {
+          const reqLines = doc.splitTextToSize(`• ${req}`, 175);
+          doc.text(reqLines, 18, y);
+          y += reqLines.length * 5 + 2;
+        });
+      }
+
+      y += 5;
+    }
+
+    if (umrahData.umrahRequirements.photos) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Photo Requirements:', 14, y);
+      y += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Quantity: ${umrahData.umrahRequirements.photos.quantity} photo(s)`, 18, y);
+      y += 5;
+
+      if (umrahData.umrahRequirements.photos.specifications && umrahData.umrahRequirements.photos.specifications.length > 0) {
+        umrahData.umrahRequirements.photos.specifications.forEach((spec, index) => {
+          const specLines = doc.splitTextToSize(`• ${spec}`, 175);
+          doc.text(specLines, 18, y);
+          y += specLines.length * 5 + 2;
+        });
+      }
+
+      y += 5;
+    }
+  }
+
+  // Flight Options
+  if (umrahData.flightOptions) {
+    if (y > 220) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Flight Options', y);
+
+    doc.setFontSize(10);
+    doc.text(`Direct Flight: ${umrahData.flightOptions.directFlight ? 'Available' : 'Not available'}`, 14, y);
+    y += 5;
+
+    doc.text(`Transit Flight: ${umrahData.flightOptions.transitFlight ? 'Available' : 'Not available'}`, 14, y);
+    y += 5;
+
+    doc.text(`Departure City: ${umrahData.flightOptions.departureCity || 'Dhaka'}`, 14, y);
+    y += 5;
+
+    doc.text(`Arrival City: ${umrahData.flightOptions.arrivalCity || 'Jeddah/Madinah'}`, 14, y);
+    y += 8;
+
+    if (umrahData.flightOptions.airlines && umrahData.flightOptions.airlines.length > 0) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Available Airlines:', 14, y);
+      y += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(umrahData.flightOptions.airlines.join(', '), 18, y);
+      y += 10;
+    }
+  }
+
+  // Meals Info
+  if (umrahData.meals) {
+    if (y > 220) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Meals Information', y);
+
+    doc.setFontSize(10);
+    doc.text(`Status: ${umrahData.meals.included ? 'Included' : 'Not included'}`, 14, y);
+    y += 5;
+
+    if (umrahData.meals.mealPlan) {
+      doc.text(`Meal Plan: ${umrahData.meals.mealPlan}`, 14, y);
+      y += 5;
+    }
+
+    if (umrahData.meals.approximateCost) {
+      doc.text(`Approximate Cost: ${umrahData.meals.approximateCost}`, 14, y);
+      y += 5;
+    }
+
+    if (umrahData.meals.menuOptions && umrahData.meals.menuOptions.length > 0) {
+      doc.text('Menu Options:', 14, y);
+      y += 5;
+
+      umrahData.meals.menuOptions.forEach((option, index) => {
+        doc.text(`• ${option}`, 18, y);
+        y += 5;
+      });
+
+      y += 5;
+    }
+  }
+
+  // Pricing Table
+  if (umrahData.pricing && umrahData.pricing.length > 0) {
+    if (y > 200) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y = addSectionTitle(doc, 'Pricing Details', y);
+
+    const pricingData = [];
+    umrahData.pricing.forEach(price => {
+      price.priceDetails.forEach((detail, i) => {
+        pricingData.push([
+          i === 0 ? price.packageType : '',
+          detail.accommodationType,
+          `Tk ${detail.price.toLocaleString()}`
+        ]);
+      });
+    });
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Package Type', 'Accommodation Type', 'Price (BDT)']],
+      body: pricingData,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [76, 175, 80], textColor: [255, 255, 255] }
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+  }
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+    doc.text('Contact for booking: +880 1324-418968', 105, 285, { align: 'center' });
+  }
+};
+
+// Generic PDF fallback
+const generateGenericPDF = (doc, data) => {
+  // Basic PDF with just the title and description
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PACKAGE DETAILS', 105, 15, { align: 'center' });
+
+  doc.setFontSize(16);
+  doc.text(data.title || 'Package Information', 105, 25, { align: 'center' });
+
+  let y = 40;
+
+  // Description
+  if (data.description) {
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Description:', 14, y);
+    y += 10;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    const descriptionLines = doc.splitTextToSize(data.description, 180);
+    doc.text(descriptionLines, 14, y);
+  }
+
+  // Footer
+  doc.setFontSize(10);
+  doc.setTextColor(150);
+  doc.text('Contact for booking: +880 1324-418968', 105, 285, { align: 'center' });
+  doc.text('Page 1 of 1', 105, 290, { align: 'center' });
 };
