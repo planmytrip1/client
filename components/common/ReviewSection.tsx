@@ -123,10 +123,12 @@ export default function ReviewSection({ entityId, entityType }: ReviewSectionPro
               <div key={review._id} className="border-b border-gray-200 pb-6 last:border-0">
                 <div className="flex items-center mb-2">
                   <div className="h-10 w-10 relative rounded-full overflow-hidden bg-gray-200 mr-3">
-                    {review.userId.profileImage ? (
-                      <Image src={review.userId.profileImage} alt={review.userId.name} fill className="object-cover" />
+                    {review.userId?.profileImage ? (
+                      <Image src={review.userId.profileImage} alt={review.userId?.name || "User"} fill className="object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center bg-blue-500 text-white font-medium text-lg">{review.userId.name.charAt(0).toUpperCase()}</div>
+                      <div className="h-full w-full flex items-center justify-center bg-blue-500 text-white font-medium text-lg">
+                        {review.userId?.name ? review.userId.name.charAt(0).toUpperCase() : "U"}
+                      </div>
                     )}
                   </div>
                   <div>
@@ -145,7 +147,7 @@ export default function ReviewSection({ entityId, entityType }: ReviewSectionPro
                   </p>
                 </div> */}
 
-                {review.adminReplies && (review.adminReplies? review.adminReplies.length : 0) > 0 && (
+                {review.adminReplies && (review.adminReplies ? review.adminReplies.length : 0) > 0 && (
                   <div className="mt-3 ml-14 border-l-2 border-blue-200 pl-4">
                     {review.adminReplies.map((reply, idx) => (
                       <p key={idx} className="text-gray-800 text-sm">

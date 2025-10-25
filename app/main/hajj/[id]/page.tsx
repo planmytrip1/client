@@ -1,8 +1,12 @@
 "use client";
 
 import { useGetHajjByIdQuery } from "@/store/features/api/HajjApi";
+import { useGetUserBookingsQuery } from "@/store/features/api/bookingApi";
+import { useAppSelector } from "@/store/hooks";
+import { selectUser } from "@/store/features/auth/authSlice";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, DollarSign, CheckCircle, XCircle, Tag, Star, Download, Users, MapPin, Info, ChevronLeft, ChevronRight } from "lucide-react";
 import { use } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -10,25 +14,33 @@ import HotelDetails from "@/components/common/HotelDetails";
 import ItineraryTimeline from "@/components/common/ItineraryTimeline";
 import HajjAccommodationDetails from "@/components/hajj/HajjAccommodationDetails";
 import ReviewSection from "@/components/common/ReviewSection";
-import { generateAndDownloadPDF } from "@/utils/pdfService";
 import BookingForm from "@/components/common/BookingForm";
-import { motion, AnimatePresence } from "framer-motion"; // Import for animations
-
+import { generateAndDownloadPDF } from "@/utils/pdfService";
 
 export interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 export default function HajjDetailsPage({ params, searchParams }: PageProps) {
-// export default function HajjDetailsPage({ params }: { params: { id: string } }) {
+  // export default function HajjDetailsPage({ params }: { params: { id: string } }) {
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: hajj, isLoading, error } = useGetHajjByIdQuery(resolvedParams.id);
 
- type TabKey = "overview" | "itinerary" | "accommodation" | "hotels" | "policies";
+  type TabKey = "overview" | "itinerary" | "accommodation" | "hotels" | "policies";
 
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showBookingForm, setShowBookingForm] = useState(false);
+
+  // ✅ Get current user info
+  const user = useAppSelector(selectUser);
+  const currentUserId = user?.id;
+  const packageId = hajj?._id;
+
+  // ✅ Only fetch user bookings when logged in & tour loaded
+  const { data: userBookings } = useGetUserBookingsQuery({ userId: currentUserId!, packageId: packageId! }, { skip: !currentUserId || !packageId });
+
+  const alreadyBooked = userBookings && userBookings.length > 0;
 
   // Carousel navigation
   const nextImage = () => {
@@ -55,11 +67,11 @@ export default function HajjDetailsPage({ params, searchParams }: PageProps) {
   }, [hajj, activeImage]);
 
   // Handle download brochure
-  const handleDownloadBrochure = () => {
-    if (hajj) {
-      generateAndDownloadPDF(hajj, "hajj");
-    }
-  };
+  // const handleDownloadBrochure = () => {
+  //   if (hajj) {
+  //     generateAndDownloadPDF(hajj, "hajj");
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -77,6 +89,30 @@ export default function HajjDetailsPage({ params, searchParams }: PageProps) {
       </div>
     );
   }
+
+  const CTASection = (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="mt-8 flex flex-col md:flex-row gap-4 items-center">
+      {alreadyBooked ? (
+        <div className="w-full md:w-auto py-3 px-10 bg-green-100 text-green-800 text-lg font-semibold rounded-lg border border-green-300 text-center shadow-sm">
+          ✅ You Already Booked This Hajj Package
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowBookingForm(true)}
+          className="w-full md:w-auto py-3 px-10 bg-tour hover:bg-tour-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+        >
+          <span>Book This Hajj Package</span>
+        </button>
+      )}
+
+      <button
+        onClick={() => generateAndDownloadPDF(hajj, "Hajj")}
+        className="w-full md:w-auto py-3 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
+      >
+        Download Brochure
+      </button>
+    </motion.div>
+  );
 
   // Format date for display
   const formatDate = (dateString: string | number | Date) => {
@@ -444,22 +480,23 @@ export default function HajjDetailsPage({ params, searchParams }: PageProps) {
           </motion.div>
 
           {/* Enhanced CTA Buttons */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="mt-8 flex flex-col md:flex-row gap-4 items-center">
+          {/* <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="mt-8 flex flex-col md:flex-row gap-4 items-center">
             <button
               onClick={() => setShowBookingForm(true)}
-              className="w-full md:w-auto py-4 px-10 bg-hajj hover:bg-hajj-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+              className="w-full md:w-auto py-3 px-10 bg-hajj hover:bg-hajj-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
             >
               <span>Book This Package</span>
             </button>
 
             <button
               onClick={handleDownloadBrochure}
-              className="w-full md:w-auto py-3.5 px-6 border border-hajj text-hajj hover:bg-hajj-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
+              className="w-full md:w-auto py-3 px-6 border border-hajj text-hajj hover:bg-hajj-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
             >
               <Download className="h-5 w-5 mr-2" />
               Download Brochure
             </button>
-          </motion.div>
+          </motion.div> */}
+          {CTASection}
         </div>
 
         {/* Reviews Section */}

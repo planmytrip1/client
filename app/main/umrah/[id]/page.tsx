@@ -1,32 +1,27 @@
 "use client";
 
 import { useGetUmrahByIdQuery } from "@/store/features/api/umrahApi";
+import { useGetUserBookingsQuery } from "@/store/features/api/bookingApi";
+import { useAppSelector } from "@/store/hooks";
+import { selectUser } from "@/store/features/auth/authSlice";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { use } from "react";
-import {
-  Calendar,
-  DollarSign,
-  CheckCircle,
-  XCircle,
-  Download,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Calendar, DollarSign, CheckCircle, XCircle, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import HotelDetails from "@/components/common/HotelDetails";
 import ItineraryTimeline from "@/components/common/ItineraryTimeline";
 import ReviewSection from "@/components/common/ReviewSection";
-import { motion, AnimatePresence } from "framer-motion";
 import BookingForm from "@/components/common/BookingForm";
 import { generateAndDownloadPDF } from "@/utils/pdfService";
 
 export interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+  searchParams?: Promise<Record<string, string | string[] | undefined>>; // Make searchParams a Promise too
 }
 export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
-// export default function UmrahDetailsPage({ params }: { params: { id: string } }) {
+  // export default function UmrahDetailsPage({ params }: { params: { id: string } }) {
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: umrah, isLoading, error } = useGetUmrahByIdQuery(resolvedParams.id);
 
@@ -35,6 +30,16 @@ export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showBookingForm, setShowBookingForm] = useState(false);
+
+  // ✅ Get current user info
+  const user = useAppSelector(selectUser);
+  const currentUserId = user?.id;
+  const packageId = umrah?._id;
+
+  // ✅ Only fetch user bookings when logged in & tour loaded
+  const { data: userBookings } = useGetUserBookingsQuery({ userId: currentUserId!, packageId: packageId! }, { skip: !currentUserId || !packageId });
+
+  const alreadyBooked = userBookings && userBookings.length > 0;
 
   // Carousel
   const nextImage = () => {
@@ -56,26 +61,52 @@ export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
   }, [umrah, activeImage]);
 
   // PDF download
-  const handleDownloadBrochure = () => {
-    if (umrah) {
-      generateAndDownloadPDF(umrah, "umrah");
-    }
-  };
+  // const handleDownloadBrochure = () => {
+  //   if (umrah) {
+  //     generateAndDownloadPDF(umrah, "umrah");
+  //   }
+  // };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <LoadingSpinner />
         <p className="mt-2 text-gray-600">Loading umrah package details...</p>
       </div>
     );
+  }
 
-  if (error || !umrah)
+  if (error || !umrah) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <p className="text-red-600">Failed to load umrah package details</p>
       </div>
     );
+  }
+
+  const CTASection = (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="mt-8 flex flex-col md:flex-row gap-4 items-center">
+      {alreadyBooked ? (
+        <div className="w-full md:w-auto py-3 px-10 bg-green-100 text-green-800 text-lg font-semibold rounded-lg border border-green-300 text-center shadow-sm">
+          ✅ You Already Booked This Umrah Package
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowBookingForm(true)}
+          className="w-full md:w-auto py-3 px-10 bg-tour hover:bg-tour-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+        >
+          <span>Book This Umrah Package</span>
+        </button>
+      )}
+
+      <button
+        onClick={() => generateAndDownloadPDF(umrah, "Umrah")}
+        className="w-full md:w-auto py-3 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
+      >
+        Download Brochure
+      </button>
+    </motion.div>
+  );
 
   const tabContent = {
     overview: (
@@ -162,21 +193,8 @@ export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
             <>
               <div className="relative h-[500px] overflow-hidden">
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeImage}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={`/api/images/umrah/${umrah.images[activeImage]}`}
-                      alt={umrah.title}
-                      fill
-                      className="object-cover"
-                      priority
-                    />
+                  <motion.div key={activeImage} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="absolute inset-0">
+                    <Image src={`/api/images/umrah/${umrah.images[activeImage]}`} alt={umrah.title} fill className="object-cover" priority />
                   </motion.div>
                 </AnimatePresence>
 
@@ -208,9 +226,7 @@ export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
                     <div
                       key={i}
                       onClick={() => setActiveImage(i)}
-                      className={`relative h-16 w-24 flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                        activeImage === i ? "ring-2 ring-umrah scale-105" : "opacity-70 hover:opacity-100"
-                      }`}
+                      className={`relative h-16 w-24 flex-shrink-0 cursor-pointer transition-all duration-200 ${activeImage === i ? "ring-2 ring-umrah scale-105" : "opacity-70 hover:opacity-100"}`}
                     >
                       <Image src={`/api/images/umrah/${img}`} alt={`Image ${i + 1}`} fill className="object-cover rounded" />
                     </div>
@@ -234,17 +250,9 @@ export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
           <div className="mb-6 border-b">
             <div className="flex overflow-x-auto">
               {(["overview", "itinerary", "hotels", "policies"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 font-medium transition-all relative ${
-                    activeTab === tab ? "text-umrah" : "text-gray-600 hover:text-umrah"
-                  }`}
-                >
+                <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 font-medium transition-all relative ${activeTab === tab ? "text-umrah" : "text-gray-600 hover:text-umrah"}`}>
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  {activeTab === tab && (
-                    <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-umrah" initial={false} />
-                  )}
+                  {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-umrah" initial={false} />}
                 </button>
               ))}
             </div>
@@ -254,34 +262,31 @@ export default function UmrahDetailsPage({ params, searchParams }: PageProps) {
           <AnimatePresence mode="wait">{tabContent[activeTab]}</AnimatePresence>
 
           {/* CTA */}
-          <div className="mt-8 flex flex-col md:flex-row gap-4 items-center">
+          {/* <div className="mt-8 flex flex-col md:flex-row gap-4 items-center">
             <button
               onClick={() => setShowBookingForm(true)}
-              className="w-full md:w-auto py-4 px-10 bg-umrah hover:bg-umrah-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+              className="w-full md:w-auto py-3 px-10 bg-umrah hover:bg-umrah-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
             >
               Book This Package
             </button>
 
             <button
               onClick={handleDownloadBrochure}
-              className="w-full md:w-auto py-3.5 px-6 border border-umrah text-umrah hover:bg-umrah-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
+              className="w-full md:w-auto py-3 px-6 border border-umrah text-umrah hover:bg-umrah-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
             >
               <Download className="h-5 w-5 mr-2" />
               Download Brochure
             </button>
-          </div>
+          </div> */}
+          {CTASection}
         </div>
 
         {/* Reviews */}
-        <div className="p-6 border-t border-gray-100">
-          {umrah._id && <ReviewSection entityId={umrah._id} entityType="Umrah" />}
-        </div>
+        <div className="p-6 border-t border-gray-100">{umrah._id && <ReviewSection entityId={umrah._id} entityType="Umrah" />}</div>
       </div>
 
       {/* Booking Form Modal */}
-      {showBookingForm && (
-        <BookingForm title={`Book ${umrah.title}`} type="umrah" itemName={umrah.title} itemId={umrah._id || ""} onClose={() => setShowBookingForm(false)} />
-      )}
+      {showBookingForm && <BookingForm title={`Book ${umrah.title}`} type="umrah" itemName={umrah.title} itemId={umrah._id || ""} onClose={() => setShowBookingForm(false)} />}
     </div>
   );
 }

@@ -1,22 +1,24 @@
 "use client";
 
 import { useGetTourByIdQuery } from "@/store/features/api/tourApi";
+import { useGetUserBookingsQuery } from "@/store/features/api/bookingApi";
+import { useAppSelector } from "@/store/hooks";
+import { selectUser } from "@/store/features/auth/authSlice";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Calendar, DollarSign, CheckCircle, XCircle, Tag, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { use } from "react";
 import ReviewSection from "@/components/common/ReviewSection";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import BookingForm from "@/components/common/BookingForm";
 import { generateAndDownloadPDF } from "@/utils/pdfService";
-import { motion, AnimatePresence } from "framer-motion"; // Import for animations
 
 export interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;  // Make searchParams a Promise too
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 export default function TourDetailsPage({ params, searchParams }: PageProps) {
-// export default function TourDetailsPage({ params }: { params: { id: string } }) {
   const resolvedParams = use(params instanceof Promise ? params : Promise.resolve(params));
   const { data: tour, isLoading, error } = useGetTourByIdQuery(resolvedParams.id);
 
@@ -25,6 +27,19 @@ export default function TourDetailsPage({ params, searchParams }: PageProps) {
   type TabKey = (typeof tabs)[number];
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showBookingForm, setShowBookingForm] = useState(false);
+
+   // ✅ Get current user info
+  const user = useAppSelector(selectUser);
+  const currentUserId = user?.id;
+  const packageId = tour?._id;
+
+   // ✅ Only fetch user bookings when logged in & tour loaded
+  const { data: userBookings } = useGetUserBookingsQuery(
+    { userId: currentUserId!, packageId: packageId! },
+    { skip: !currentUserId || !packageId }
+  );
+
+  const alreadyBooked = userBookings && userBookings.length > 0;
 
   // Carousel navigation
   const nextImage = () => {
@@ -42,7 +57,6 @@ export default function TourDetailsPage({ params, searchParams }: PageProps) {
   // Auto-advance carousel
   useEffect(() => {
     if (!tour?.images || tour.images.length <= 1) return;
-
     const interval = setInterval(() => {
       nextImage();
     }, 5000);
@@ -51,11 +65,11 @@ export default function TourDetailsPage({ params, searchParams }: PageProps) {
   }, [tour, activeImage]);
 
   // Handle download brochure
-  const handleDownloadBrochure = () => {
-    if (tour) {
-      generateAndDownloadPDF(tour, "tour");
-    }
-  };
+  // const handleDownloadBrochure = () => {
+  //   if (tour) {
+  //     generateAndDownloadPDF(tour, "tour");
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -82,6 +96,36 @@ export default function TourDetailsPage({ params, searchParams }: PageProps) {
       day: "numeric",
     });
   };
+
+    const CTASection = (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className="mt-8 flex flex-col md:flex-row gap-4 items-center"
+    >
+      {alreadyBooked ? (
+        <div className="w-full md:w-auto py-3 px-10 bg-green-100 text-green-800 text-lg font-semibold rounded-lg border border-green-300 text-center shadow-sm">
+          ✅ You Already Booked This Tour
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowBookingForm(true)}
+          className="w-full md:w-auto py-3 px-10 bg-tour hover:bg-tour-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+        >
+          <span>Book This Tour</span>
+        </button>
+      )}
+
+      <button
+        onClick={() => generateAndDownloadPDF(tour, "tour")}
+        className="w-full md:w-auto py-3 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
+      >
+        Download Brochure
+      </button>
+    </motion.div>
+  );
+
 
   // Tab content components with animation
   const tabContent = {
@@ -346,21 +390,7 @@ export default function TourDetailsPage({ params, searchParams }: PageProps) {
           </div>
 
           {/* Enhanced CTA Buttons */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="mt-8 flex flex-col md:flex-row gap-4 items-center">
-            <button
-              onClick={() => setShowBookingForm(true)}
-              className="w-full md:w-auto py-4 px-10 bg-tour hover:bg-tour-600 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
-            >
-              <span>Book This Tour</span>
-            </button>
-
-            <button
-              onClick={handleDownloadBrochure}
-              className="w-full md:w-auto py-3.5 px-6 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-300 flex items-center justify-center"
-            >
-              Download Brochure
-            </button>
-          </motion.div>
+           {CTASection}
         </div>
 
         {/* Reviews Section */}
@@ -368,15 +398,7 @@ export default function TourDetailsPage({ params, searchParams }: PageProps) {
       </div>
 
       {/* Booking Form Modal */}
-      {showBookingForm && (
-        <BookingForm
-          title={`Book ${tour.title}`}
-          type="tour"
-          itemName={tour.title}
-          itemId={tour._id || ""}
-          onClose={() => setShowBookingForm(false)}
-        />
-      )}
+      {showBookingForm && <BookingForm title={`Book ${tour.title}`} type="tours" itemName={tour.title} itemId={tour._id || ""} onClose={() => setShowBookingForm(false)} />}
     </div>
   );
 }
