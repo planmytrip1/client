@@ -58,10 +58,10 @@ export default function Header() {
             <Link href="/main/umrah" className="text-gray-800 hover:text-[#0B2149] font-medium">
               Umrah
             </Link>
-            <Link href="/about" className="text-gray-800 hover:text-[#0B2149] font-medium">
+            <Link href="/main/about" className="text-gray-800 hover:text-[#0B2149] font-medium">
               About
             </Link>
-            <Link href="/contact" className="text-gray-800 hover:text-[#0B2149] font-medium">
+            <Link href="/main/contact" className="text-gray-800 hover:text-[#0B2149] font-medium">
               Contact
             </Link>
           </nav>
@@ -149,10 +149,10 @@ export default function Header() {
               <Link href="/main/umrah" onClick={() => setIsMenuOpen(false)} className="text-gray-800 hover:text-[#0B2149]">
                 Umrah
               </Link>
-              <Link href="/about" onClick={() => setIsMenuOpen(false)} className="text-gray-800 hover:text-[#0B2149]">
+              <Link href="/main/about" onClick={() => setIsMenuOpen(false)} className="text-gray-800 hover:text-[#0B2149]">
                 About
               </Link>
-              <Link href="/contact" onClick={() => setIsMenuOpen(false)} className="text-gray-800 hover:text-[#0B2149]">
+              <Link href="/main/contact" onClick={() => setIsMenuOpen(false)} className="text-gray-800 hover:text-[#0B2149]">
                 Contact
               </Link>
 
